@@ -186,14 +186,21 @@ Token AnalisadorLexico()
 
 	if (!(palavra[0] >= '0' && palavra[0] <= '9'))
 	{
-		for (int i = 1; i < strlen(palavra); i++)
+		if(isalnum(palavra[0]) && strlen(palavra) == 1)
 		{
-			if (!(isalnum(palavra[i]) || palavra[i] == '_'))
-			{
-				return -1;
-			}
+		    return identificador;
 		}
-		return identificador;
+		else
+		{
+		    for (int i = 1; i < strlen(palavra); i++)
+    		{
+    			if (!(isalnum(palavra[i]) || palavra[i] == '_'))
+    			{
+    				return -1;
+    			}
+    		}
+    		return identificador;
+		}
 	}
 	else
 	{
