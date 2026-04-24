@@ -1,0 +1,11 @@
+Tabela de simbolos
+-  guardar as seguintes informações:
+    -nome
+    -tipo-> int/null
+    -naturexa (variavel,procedimento,funcao,parametro)
+      -se for procedimento ponteiro fica null
+    -Escopo ( numero inteiro)
+    -parametros são guardados como outro simbolo
+-Adicionar escopo
+-quando acabar o escopo remover as informações daquele escopo
+-
