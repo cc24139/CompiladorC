@@ -3,6 +3,11 @@
 #include <ctype.h>
 #define numPalavras 36
 FILE *arquivo;
+typedef enum{
+    false,
+    true
+}bool;
+
 const char *palavras[] = {
 	"program",
 	"label",
@@ -129,9 +134,9 @@ typedef enum {
 
 int retornarDelimitador(char letra) {
 	if(isspace(letra) || ispunct(letra)) {
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 int retornarProximaPalavra(FILE *arquivo,char *palavra) {
@@ -141,13 +146,13 @@ int retornarProximaPalavra(FILE *arquivo,char *palavra) {
 	while ((charact = fgetc(arquivo)) != EOF && isspace(charact));
 
 	if (charact == EOF) {
-		palavra = "EndStream";
-		return 0;
+		palavra = "EOF";
+		return false;
 	}
 	if(isspace(charact) || ispunct(charact)) {
 		palavra [0] = charact;
 		palavra[1] = '\0';
-		return 1;
+		return true;
 	}
 	palavra[i++] = charact;
 	while(retornarDelimitador(charact = fgetc(arquivo))==0) {
@@ -158,7 +163,7 @@ int retornarProximaPalavra(FILE *arquivo,char *palavra) {
 	if (charact != EOF) {
 		ungetc(charact, arquivo);
 	}
-	return 1;
+	return true;
 }
 
 
@@ -217,5 +222,5 @@ int main()
 		printf("%s \n",tokenString[token]);
 		token = AnalisadorLexico();
 	}
-	printf("%s",tokenString[token]);
+		printf("%s \n",tokenString[token]);
 }
