@@ -186,9 +186,9 @@ Token AnalisadorLexico()
 
 	if (!(palavra[0] >= '0' && palavra[0] <= '9'))
 	{
-		if(isalnum(palavra[0]) && strlen(palavra) == 1)
+		if(!(isalnum(palavra[0])) && strlen(palavra) == 1)
 		{
-		    return identificador;
+		    return -1;
 		}
 		else
 		{
