@@ -129,7 +129,8 @@ typedef enum {
 	ponto,
 	numero,
 	identificador,
-	finalDeArquivo
+	finalDeArquivo,
+	invalido
 } Token;
 
 int retornarDelimitador(char letra) {
@@ -188,7 +189,7 @@ Token AnalisadorLexico()
 	{
 		if(!(isalnum(palavra[0])) && strlen(palavra) == 1)
 		{
-		    return -1;
+		    return invalido;
 		}
 		else
 		{
@@ -196,7 +197,7 @@ Token AnalisadorLexico()
     		{
     			if (!(isalnum(palavra[i]) || palavra[i] == '_'))
     			{
-    				return -1;
+    				return invalido;
     			}
     		}
     		return identificador;
@@ -208,12 +209,12 @@ Token AnalisadorLexico()
 		{
 			if (!(palavra[i] >= '0' && palavra[i] <= '9'))
 			{
-				return -1;
+				return invalido;
 			}
 		}
 		return numero;
 	}
-	return -1;
+	return invalido;
 }
 
 
@@ -226,8 +227,13 @@ int main()
 	arquivo = fopen("arq.txt", "r");
 	Token token = AnalisadorLexico();
 	while(token != finalDeArquivo) {
+	    if(token == invalido){
+		    printf("token inválido!");
+		    return 1;
+	    }
 		printf("%s \n",tokenString[token]);
 		token = AnalisadorLexico();
+
 	}
 		printf("%s \n",tokenString[token]);
 }
