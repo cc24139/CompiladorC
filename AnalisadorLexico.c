@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #define numPalavras 36
+
 FILE *arquivo;
 typedef enum{
     false,
