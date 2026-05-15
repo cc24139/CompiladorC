@@ -108,4 +108,124 @@ void AtribuirVariavel(){
     }
 }
 
+void VerificaComandoSemRotulo()
+{
+	token = anaLex();
+	if(token == identificador)
+	{
+		token = anaLex();
+		if (token == abrecolchetes)
+		{
+			verificaExpressao();
+			token = anaLex();
+			while(token != fechacolchetes)
+			{
+				if(token != virgula)
+				{
+					printf("Erro: Esperava-se uma virgula");
+        			exit(-1);
+				}
+				VerificaExpressao();
+			}
+			token = anaLex();
+			if(token == atribuicao)
+			{
+				VerificaExpressao();
+			}
+		}
+		if(token == atribuicao)
+		{
+			VerificaExpressao();
+		}
+		if(token == abreparenteses)
+		{
+			while(token != fechaparenteses)
+			{
+				if(token != virgula)
+				{
+					printf("Erro: Esperava-se uma virgula");
+        			exit(-1);
+				}
+				VerificaExpressao();
+				token = anaLex();
+			}
+		}
+		
+	}
+	else if(token == vapara)
+	{
+		token = anaLex();
+		if (token != numero)
+		{
+			printf("Erro: Esperava-se um número");
+        	exit(-1);
+		}		
+	}
+	else if(token == inicio)
+	{
+		VerificaComando();
+		token = anaLex();
+		while(token != fim)
+		{
+			if (token != doispontos)
+			{
+				printf("Erro: Esperava-se um dois pontos");
+        		exit(-1);
+			}
+			verificaComando();
+			token = anaLex();
+		}
+	}
+	else if (token == se)
+	{
+		VerificaExpressao();
+		token = anaLex();
+		if(token != entao)
+		{
+			printf("Erro: Esperava-se um entao");
+        	exit(-1);
+		}
+		VerificaComandoSemRotulo();
+		token = anaLex();
+		if (token == senao)
+		{
+			VerificaComandoSemRotulo();
+		}
+		
+	}
+	else if(token == enquanto)
+	{
+		VerificaExpressao();
+		token = anaLex();
+		if (token != faca)
+		{
+			printf("Erro: Esperava-se um faca");
+        	exit(-1);
+		}
+		VerificaComandoSemRotulo();
+	}
+	else
+	{
+		printf("Erro: Esperava-se um identificador, vapara, inicio, se ou enquanto");
+		exit(-1);
+	}
+	
+}
 
+void VerificaComando()
+{
+	verificaComandoSemRotulo();
+	token = anaLex();
+	if (token != numero)
+	{
+		printf("Erro: Esperava-se um número ou comando sem rótulo");
+		exit(-1);
+	}
+	token = anaLex();
+	if (token != doispontos)
+	{
+		printf("Erro: Esperava-se dois pontos");
+		exit(-1);
+	}
+	VerificaComandoSemRotulo();
+}
