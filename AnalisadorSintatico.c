@@ -1,3 +1,6 @@
+#include "basics.h"
+#include "AnalisadorLexico.h"
+
 void verificaProgam() {
 	Token token = anaLex();
 	if (token != Programa) {
@@ -38,36 +41,12 @@ void verificaProgam() {
 		exit(1);
 	}
 }
-}
-
 void verificaBloco() {
 	Token token = anaLex();
-	if (token != label) {
-		printf("Erro: esperava a palavra label!");
-		exit(1);
+	if(token == label){
+		AtribuirLabel();
 	}
-	token = anaLex();
-	if (token != numero) {
-		printf("Erro: esperava a palavra numero!");
-		exit(1);
-	}
-	token = anaLex();
-	if (token != virgula || token != pontoEVirgula) {
-		printf("Erro: esperava a palavra virgula ou pontoEVirgula");
-		exit(1);
-	}
-	while(token != virgula) {
-		token = anaLex();
-		if(token != numero) {
-			printf("Erro: esperava a palavra numero");
-			exit(1);
-		}
-		token = anaLex();
-		if (token != virgula || token != pontoEVirgula) {
-			printf("Erro: esperava a palavra virgula ou pontoEVirgula");
-			exit(1);
-		}
-	}
+
 	token = anaLex();
     if (verificaType(Token) == false){
         printf("Erro: Esperava um tipo");
@@ -78,14 +57,51 @@ void verificaBloco() {
         token = anaLex();
     }
     if (token != implicito){
-        
+        printf("Erro: Esperava implicito");
+		exit(1);
     }
+	token = analex();
+	if(token != identificador){
+		printf("Erro: Esperava identificador");
+		exit(1);
+	}
+	while(token != identificador ){
+		AtribuirTipoImplicito();
+		token = analex();
+	}
+	token = analex();
+	if(token != procedimento || token != )
     
 }
 
+void  AtribuirLabel(){
+	Token token = anaLex();
+	if (token != numero) {
+		printf("Erro: esperava a palavra numero!");
+		exit(1);
+	}
+	token = anaLex();
+	if (token != virgula || token != pontoevirgula) {
+		printf("Erro: esperava a palavra virgula ou pontoEVirgula");
+		exit(1);
+	}
+	while(token != virgula) {
+		token = anaLex();
+		if(token != numero) {
+			printf("Erro: esperava a palavra numero");
+			exit(1);
+		}
+		token = anaLex();
+		if (token != virgula || token != pontoevirgula) {
+			printf("Erro: esperava a palavra virgula ou pontoEVirgula");
+			exit(1);
+		}
+	}
+	
+}
 
 void AtribuirVariavel(){
-    token = anaLex();
+    Token token = anaLex();
     if(token != identificador){
         printf("Erro:Esperava um identificador");
         exit(1);
@@ -106,6 +122,31 @@ void AtribuirVariavel(){
         printf("Erro: Esperava um pontoEVirgula");
         exit(-1);
     }
+}
+
+void AtribuirTipoImplicito(){
+	Token token;
+	while( (token= analex()) != virgula ){
+		token  = analex();
+		if(token != identificador){
+			printf("Erro: esperava-se um identificador");
+			exit(1);
+		}
+	}
+	if(token != doispontos){
+		printf("Erro: esperava-se dois pontos");
+		exit(1);
+	}
+	token = analex();
+	if(token != tipo ){
+		printf("Erro: esperava-se um tipo");
+		exit(1);
+	}
+	token = analex();
+	if(token != pontoevirgula){
+		printf("Erro: esperava-se um ponto e virgula");
+		exit(1);
+	}
 }
 
 void VerificaComandoSemRotulo()
