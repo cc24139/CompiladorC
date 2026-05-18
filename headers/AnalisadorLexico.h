@@ -1,132 +1,30 @@
-#ifndef analex_h
-#define analex_h
-#define const char *palavras[] = {
-	"program",
-	"label",
-	"type",
-	"var",
-	"procedure",
-	"function",
-	"begin",
-	"end",
-	":=",
-	"if",
-	"then",
-	"else",
-	"while",
-	"do",
-	"goto",
-	"+",
-	"-",
-	"*",
-	"div",
-	"=",
-	"<>",
-	"<",
-	"<=",
-	">",
-	">=",
-	"and",
-	"or",
-	"not",
-	"(",
-	")",
-	"[",
-	"]",
-	",",
-	";",
-	":",
-	".",
-	"EOF"
-};
+#ifndef ANALEX_H
+#define ANALEX_H
 
-#define char *tokenString[39] = {
-	"programa",
-	"rotulo",
-	"tipo",
-	"variavel",
-	"procedimento",
-	"funcao",
-	"inicio",
-	"fim",
-	"atribuicao",
-	"se",
-	"entao",
-	"senao",
-	"enquanto",
-	"faca",
-	"vapara",
-	"mais",
-	"menos",
-	"vezes",
-	"dividir",
-	"igual",
-	"diferente",
-	"menor",
-	"menorouigual",
-	"maior",
-	"maiorouigual",
-	"e",
-	"ou",
-	"nao",
-	"abreparenteses",
-	"fechaparenteses",
-	"abrecolchetes",
-	"fechacolchetes",
-	"virgula",
-	"pontoevirgula",
-	"doispontos",
-	"ponto",
-	"numero",
-	"identificador",
-	"fimDeArquivo"
-};
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
+#define NUM_PALAVRAS 37
+
+ extern char *palavras[];
+ extern char *tokenString[];
 typedef enum {
-	programa,
-	rotulo,
-	tipo,
-	variavel,
-	procedimento,
-	funcao,
-	inicio,
-	fim,
-	atribuicao,
-	se,
-	entao,
-	senao,
-	enquanto,
-	faca,
-	vapara,
-	mais,
-	menos,
-	vezes,
-	dividir,
-	igual,
-	diferente,
-	menor,
-	menorouigual,
-	maior,
-	maiorouigual,
-	e,
-	ou,
-	nao,
-	abreparenteses,
-	fechaparenteses,
-	abrecolchetes,
-	fechacolchetes,
-	virgula,
-	pontoevirgula,
-	doispontos,
-	ponto,
-	numero,
-	identificador,
-	finalDeArquivo,
-	invalido
+    programa, rotulo,
+	 tipo, variavel, procedimento, funcao,
+    inicio, fim, atribuicao, se, entao, senao, enquanto, faca,
+    vapara, mais, menos, vezes, dividir, igual, diferente,
+    menor, menorouigual, maior, maiorouigual, e, ou, nao,
+    abreparenteses, fechaparenteses, abrecolchetes,
+    fechacolchetes, virgula, pontoevirgula, doispontos,
+    ponto, numero, identificador, finalDeArquivo, invalido
 } Token;
 
 int retornarDelimitador(char letra);
 int retornarProximaPalavra(FILE *arquivo, char *palavra);
-Token AnalisadorLexico();
+Token Analex();
+
+extern unsigned int linha;
+extern FILE *arquivo;
 
 #endif
