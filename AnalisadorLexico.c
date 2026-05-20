@@ -48,6 +48,16 @@ char *palavras[] = {
 	 "EOF"
 };
 
+char *tipos[] = {
+	 "inteiro",
+	 "real",
+	 "booleano",
+	 "caractere",
+	 "integer"
+};
+
+NumTipos = 5;
+
 char *tokenString[] = {
 	 "programa",
 	 "rotulo",
@@ -89,6 +99,7 @@ char *tokenString[] = {
 	 "identificador",
 	 "fimDeArquivo"
 };
+
 int retornarDelimitador(char letra) {
 	if(isspace(letra) || ispunct(letra)) {
 		return true;
@@ -135,12 +146,23 @@ int retornarProximaPalavra(FILE *arquivo,char *palavra) {
 	return true;
 }
 
+bool verificaType(char* palavra) {
+	for (int i = 0; i < NUM_TIPOS; i++) {
+		if (strcmp(palavra, tipos[i]) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
 
 Token Analex()
 {
 	char palavra[100];
 	if(!(retornarProximaPalavra(arquivo,palavra))){
 	    return finalDeArquivo;
+	}
+	if(verificaType(palavra)) {
+		return tipo;
 	}
 	if(strcmp(palavra, "EOF") == 0) {
 		return finalDeArquivo;

@@ -12,11 +12,7 @@ void VerificaComando();
 void VerificaExpressao();
 
 bool verificaType(Token token){
-	if(token != tipo){
-		printf("Erro: Esperava-se um tipo. Linha: %u, função: %s()\n", linha, __func__);
-		exit(-1);
-	}
-	return true;
+	return token == tipo || token == identificador;
 }
 
 void Fator(){
@@ -251,11 +247,12 @@ bool EhBloco(){
 	bool EhProcedimento = token == procedimento;
 	bool EhFuncao = token == funcao;
 	bool EhBegin = token == inicio;
+
 	return Ehrotulo || EhTipo ||  EhImplicito||EhProcedimento || EhFuncao || EhBegin;
 }
 
 void parametrosFormais(Token tokenComparativo){
-	while (token == pontoevirgula){
+	while (token == pontoevirgula || token == abreparenteses){
 		token = Analex();
 		if(token != identificador  && token != variavel && token != funcao && token != procedimento){
 			printf("Erro: Esperava-se um identificador, variavel, funcao ou procedimento. Linha: %u, função: %s()\n", linha, __func__);
@@ -270,19 +267,24 @@ void parametrosFormais(Token tokenComparativo){
 		}
 		if (token == identificador){
 			token = Analex();
+			if(token != doispontos){
+				printf("Erro: Esperava-se um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
+				exit(-1);
+			}
+			token = Analex();
+			if(verificaType(token) == false){
+				printf("Erro: Esperava-se um tipo. Linha: %u, função: %s()\n", linha, __func__);
+				exit(-1);
+			}
+			token = Analex();
 			while(token == virgula){
 				token = Analex();
 				if(token != identificador){
 					printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 					exit(-1);
 				}
-				token = Analex();
 			}
-			if(token != doispontos){
-				printf("Erro: Esperava-se um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
-				exit(-1);
-			}
-			token = Analex();
+
 		}
 		if(token == funcao){
 			token = Analex();
@@ -332,6 +334,7 @@ void parametrosFormais(Token tokenComparativo){
 	}
 	if(token != fechaparenteses){
 		printf("Erro: Esperava-se um fechaparenteses. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(-1);
 	}
 }
@@ -352,8 +355,9 @@ void AtribuirFuncao(){
 		exit(1);
 	}
 	token = Analex();
-	if(token != abreparenteses || token != doispontos){
+	if(token != abreparenteses && token != doispontos){
 		printf("Erro: esperava-se um parametro formal ou um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
 	AtribuirParametosFormais(doispontos);
@@ -363,50 +367,71 @@ void AtribuirFuncao(){
 		exit(1);
 	}
 	token = Analex();
-	if(token != EhBloco()){
+	if(token != pontoevirgula){
+		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
+		exit(1);
+	}
+	token = Analex();
+	if(token != EhBloco() && token != inicio){
 		printf("Erro: esperava-se um bloco. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
 }
 
 void AtribuirProcedimento(){
 	token = Analex();
-	if(token != abreparenteses || token != EhBloco()){
-		printf("Esperava-se um parametro formal ou um bloco!");
+	if(token != identificador){
+		printf("Erro: esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
+		exit(1);
+	}
+	token = Analex();
+	if(token != abreparenteses && token != EhBloco()){
+		printf("Erro: esperava-se um parametro formal ou um bloco. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
 	if(token == abreparenteses){
 		parametrosFormais(pontoevirgula);
 	}
 	token = Analex();
+	if(token != pontoevirgula){
+		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
+		exit(1);
+	}
+	token = Analex();
 	if(token != EhBloco()){
 		printf("Esperava-se um bloco!");
+		printf("Erro: esperava-se um bloco. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
 	verificaBloco();
 	token = Analex();
 	if(token != pontoevirgula){
 		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
 }
 
 void AtribuirTipoImplicito(){
-	token;
-	token = Analex();
 	if(token != variavel){
 		printf("Erro: esperava-se a uma variavel. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
 	token = Analex();
 	if(token != identificador){
 		printf("esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
-	while( (token= Analex()) != virgula ){
+	while( (token= Analex()) == virgula ){
 		token  = Analex();
 		if(token != identificador){
 			printf("Erro: esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
+			printf("Token encontrado: %s\n", tokenString[token]);
 			exit(1);
 		}
 	}
@@ -415,7 +440,7 @@ void AtribuirTipoImplicito(){
 		exit(1);
 	}
 	token = Analex();
-	if(token != tipo ){
+	if(verificaType(token) == false){
 		printf("Erro: esperava-se um tipo. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
@@ -433,8 +458,8 @@ void AtribuirVariavel(){
 		exit(1);
 	}
 	token = Analex();
-	if(token != igual){
-		printf("Erro: Esperava um =. Linha: %u, função: %s()\n", linha, __func__);
+	if(token != doispontos){
+		printf("Erro: Esperava um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
 		exit(-1);
 	}
 	token = Analex();
@@ -456,18 +481,19 @@ void  Atribuirrotulo(){
 		exit(1);
 	}
 	token = Analex();
-	if (token != virgula || token != pontoevirgula) {
+	if (token != virgula && token != pontoevirgula) {
 		printf("Erro: esperava a palavra virgula ou pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
-	while(token != virgula) {
+	printf("Token encontrado: %s\n", tokenString[token]);
+	while(token == virgula) {
 		token = Analex();
 		if(token != numero) {
 			printf("Erro: esperava a palavra numero. Linha: %u, função: %s()\n", linha, __func__);
 			exit(1);
 		}
 		token = Analex();
-		if (token != virgula || token != pontoevirgula) {
+		if (token != virgula && token != pontoevirgula) {
 			printf("Erro: esperava a palavra virgula ou pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
 			exit(1);
 		}
@@ -475,7 +501,6 @@ void  Atribuirrotulo(){
 }
 
 void verificaBloco() {
-	token = Analex();
 	while(token == rotulo){
 		Atribuirrotulo();
 		token = Analex();
@@ -537,6 +562,7 @@ void verificaProgam() {
 		printf("Erro: esperava a palavra virgula ou pontoEVirgula!. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	token = Analex();
 	verificaBloco();
 	token = Analex();
 	if (token != ponto) {

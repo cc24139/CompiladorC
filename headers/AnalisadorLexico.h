@@ -6,6 +6,7 @@
 #include <ctype.h>
 
 #define NUM_PALAVRAS 37
+#define NUM_TIPOS 5
 
  extern char *palavras[];
  extern char *tokenString[];
