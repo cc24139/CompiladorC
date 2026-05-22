@@ -3,7 +3,12 @@
 #include <ctype.h>
 #include "headers/basics.h"
 #include "headers/AnalisadorLexico.h"
-
+/*
+	Integrantes:
+Nome     RA
+Daniel 	24123
+Luis 	24139
+*/
 
 unsigned int linha = 1;
 FILE *arquivo;
@@ -56,7 +61,6 @@ char *tipos[] = {
 	 "integer"
 };
 
-NumTipos = 5;
 
 char *tokenString[] = {
 	 "programa",
@@ -101,13 +105,14 @@ char *tokenString[] = {
 };
 
 int retornarDelimitador(char letra) {
+
 	if(isspace(letra) || ispunct(letra)) {
 		return true;
 	}
 	return false;
 }
 
-int retornarProximaPalavra(FILE *arquivo,char *palavra) {
+bool retornarProximaPalavra(FILE *arquivo,char *palavra) {
 	int charact;
 	int i =0;
 
@@ -130,7 +135,7 @@ int retornarProximaPalavra(FILE *arquivo,char *palavra) {
 
 	palavra[i++] = charact;
 
-	while(retornarDelimitador(charact = fgetc(arquivo))==0) {
+	while(retornarDelimitador(charact = fgetc(arquivo) )==0) {
 		if(charact == '\n') {
 			linha++;
 		}
@@ -139,6 +144,7 @@ int retornarProximaPalavra(FILE *arquivo,char *palavra) {
 
 	palavra[i] = '\0';
 
+	//Para no delimitador, mas não perde o caractere
 	if (charact != EOF) {
 		ungetc(charact, arquivo);
 	}
@@ -211,7 +217,7 @@ Token Analex()
 
 
 
-/*
+
 int main()
 {
 	arquivo = fopen("./arq.txt", "r");
@@ -228,4 +234,3 @@ int main()
 	}
 		printf("%s \n",tokenString[token]);
 }
-*/
