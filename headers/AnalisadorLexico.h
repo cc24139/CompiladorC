@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <headers/basics.h>
 
 #define NUM_PALAVRAS 37
 #define NUM_TIPOS 5
@@ -22,10 +23,11 @@ typedef enum {
 } Token;
 
 int retornarDelimitador(char letra);
-int retornarProximaPalavra(FILE *arquivo, char *palavra);
+int retornarProximaPalavra(FILE *arquivo);
 Token Analex();
 
 extern unsigned int linha;
 extern FILE *arquivo;
+extern char *palavraAtual;
 
 #endif

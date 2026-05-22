@@ -12,6 +12,7 @@ Luis 	24139
 
 unsigned int linha = 1;
 FILE *arquivo;
+char* palavraAtual;
 
 char *palavras[] = {
 	 "program",
@@ -112,7 +113,8 @@ int retornarDelimitador(char letra) {
 	return false;
 }
 
-bool retornarProximaPalavra(FILE *arquivo,char *palavra) {
+
+bool retornarProximaPalavra(FILE *arquivo) {
 	int charact;
 	int i =0;
 
@@ -128,21 +130,21 @@ bool retornarProximaPalavra(FILE *arquivo,char *palavra) {
 	}
 
 	if(ispunct(charact)) {
-		palavra[0] = charact;
-		palavra[1] = '\0';
+		palavraAtual[0] = charact;
+		palavraAtual[1] = '\0';
 		return true;
 	}
 
-	palavra[i++] = charact;
+	palavraAtual[i++] = charact;
 
 	while(retornarDelimitador(charact = fgetc(arquivo) )==0) {
 		if(charact == '\n') {
 			linha++;
 		}
-		palavra[i++] = charact;
+		palavraAtual[i++] = charact;
 	}
 
-	palavra[i] = '\0';
+	palavraAtual[i] = '\0';
 
 	//Para no delimitador, mas não perde o caractere
 	if (charact != EOF) {
@@ -163,8 +165,8 @@ bool verificaType(char* palavra) {
 
 Token Analex()
 {
-	char palavra[100];
-	if(!(retornarProximaPalavra(arquivo,palavra))){
+	palavraAtual = char*[100];
+	if(!(retornarProximaPalavra(arquivo))){
 	    return finalDeArquivo;
 	}
 	if(verificaType(palavra)) {
