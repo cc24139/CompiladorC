@@ -12,8 +12,20 @@ void VerificaComando();
 void VerificaExpressao();
 
 bool verificaType(Token token){
-	return token == tipo || token == identificador;
+	switch (palavraAtual)
+	{
+	case "Integer":
+		return true
+	case "Double":
+		return true;
+	case "char":
+		return true;	
+	default:
+		return false;
+	}
 }
+
+
 
 void Fator(){
 	if(token != identificador || token != numero || token != abreparenteses || token != nao){

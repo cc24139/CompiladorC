@@ -12,7 +12,7 @@ Luis 	24139
 
 unsigned int linha = 1;
 FILE *arquivo;
-char* palavraAtual;
+char* palavraAtual[100];
 
 char *palavras[] = {
 	 "program",
@@ -54,13 +54,7 @@ char *palavras[] = {
 	 "EOF"
 };
 
-char *tipos[] = {
-	 "inteiro",
-	 "real",
-	 "booleano",
-	 "caractere",
-	 "integer"
-};
+
 
 
 char *tokenString[] = {
@@ -110,6 +104,7 @@ int retornarDelimitador(char letra) {
 	if(isspace(letra) || ispunct(letra)) {
 		return true;
 	}
+	
 	return false;
 }
 
@@ -165,12 +160,9 @@ bool verificaType(char* palavra) {
 
 Token Analex()
 {
-	palavraAtual = char*[100];
+	palavraAtual[0] = '\0';
 	if(!(retornarProximaPalavra(arquivo))){
 	    return finalDeArquivo;
-	}
-	if(verificaType(palavra)) {
-		return tipo;
 	}
 	if(strcmp(palavra, "EOF") == 0) {
 		return finalDeArquivo;
