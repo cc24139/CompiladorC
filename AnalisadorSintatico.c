@@ -12,7 +12,16 @@ void VerificaComando();
 void VerificaExpressao();
 
 bool verificaType(Token token){
-	return token == tipo || token == identificador;
+	if(strcmp(palavraAtual, "integer") == 0)
+        return true;
+
+    if(strcmp(palavraAtual, "double") == 0)
+        return true;
+
+    if(strcmp(palavraAtual, "char") == 0)
+        return true;
+
+    return false;
 }
 
 void Fator(){
