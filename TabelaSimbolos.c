@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "headers/basics.h"
+#include "headers/TabelaSimbolos.h"
+#include "headers/AnalisadorLexico.h"
 
 struct TabelaSimbolos _AumentarTabela(struct TabelaSimbolos *tabela);
 bool BuscarSimbolo(struct TabelaSimbolos *tabela, char* nome);
@@ -10,7 +12,7 @@ void ImprimirTabela(struct TabelaSimbolos *tabela);
 
 struct Simbolo {
     char nome[50];
-    char tipo[20];
+    Token tipo;
     int escopo;
     void *valor;
     void (*mostrarValor)(void *valor);
