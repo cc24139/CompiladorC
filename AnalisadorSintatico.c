@@ -12,17 +12,16 @@ void VerificaComando();
 void VerificaExpressao();
 
 bool verificaType(Token token){
-	switch (palavraAtual)
-	{
-	case "Integer":
-		return true
-	case "Double":
-		return true;
-	case "char":
-		return true;	
-	default:
-		return false;
-	}
+	if(strcmp(palavraAtual, "integer") == 0)
+        return true;
+
+    if(strcmp(palavraAtual, "double") == 0)
+        return true;
+
+    if(strcmp(palavraAtual, "char") == 0)
+        return true;
+
+    return false;
 }
 
 

@@ -12,7 +12,7 @@ Luis 	24139
 
 unsigned int linha = 1;
 FILE *arquivo;
-char* palavraAtual[100];
+char palavraAtual[100];
 
 char *palavras[] = {
 	 "program",
@@ -120,7 +120,7 @@ bool retornarProximaPalavra(FILE *arquivo) {
 	};
 
 	if (charact == EOF) {
-		strcpy(palavra, "EOF");
+		strcpy(palavraAtual, "EOF");
 		return false;
 	}
 
@@ -149,43 +149,34 @@ bool retornarProximaPalavra(FILE *arquivo) {
 	return true;
 }
 
-bool verificaType(char* palavra) {
-	for (int i = 0; i < NUM_TIPOS; i++) {
-		if (strcmp(palavra, tipos[i]) == 0) {
-			return true;
-		}
-	}
-	return false;
-}
-
 Token Analex()
 {
 	palavraAtual[0] = '\0';
 	if(!(retornarProximaPalavra(arquivo))){
 	    return finalDeArquivo;
 	}
-	if(strcmp(palavra, "EOF") == 0) {
+	if(strcmp(palavraAtual, "EOF") == 0) {
 		return finalDeArquivo;
 	}
 	for (int i = 0; i < NUM_PALAVRAS; i++)
 	{
-		if (strcmp(palavra, palavras[i]) == 0)
+		if (strcmp(palavraAtual, palavras[i]) == 0)
 		{
 			return i;
 		}
 	}
 
-	if (!(palavra[0] >= '0' && palavra[0] <= '9'))
+	if (!(palavraAtual[0] >= '0' && palavraAtual[0] <= '9'))
 	{
-		if(!(isalnum(palavra[0])) && strlen(palavra) == 1)
+		if(!(isalnum(palavraAtual[0])) && strlen(palavraAtual) == 1)
 		{
 		    return invalido;
 		}
 		else
 		{
-		    for (int i = 1; i < strlen(palavra); i++)
+		    for (int i = 1; i < strlen(palavraAtual); i++)
     		{
-    			if (!(isalnum(palavra[i]) || palavra[i] == '_'))
+    			if (!(isalnum(palavraAtual[i]) || palavraAtual[i] == '_'))
     			{
     				return invalido;
     			}
@@ -195,9 +186,9 @@ Token Analex()
 	}
 	else
 	{
-		for (int i = 1; i < strlen(palavra); i++)
+		for (int i = 1; i < strlen(palavraAtual); i++)
 		{
-			if (!(palavra[i] >= '0' && palavra[i] <= '9'))
+			if (!(palavraAtual[i] >= '0' && palavraAtual[i] <= '9'))
 			{
 				return invalido;
 			}
@@ -211,7 +202,7 @@ Token Analex()
 
 
 
-
+/*
 int main()
 {
 	arquivo = fopen("./arq.txt", "r");
@@ -227,4 +218,4 @@ int main()
 
 	}
 		printf("%s \n",tokenString[token]);
-}
+}*/
