@@ -22,10 +22,10 @@ typedef enum {
 } Token;
 
 int retornarDelimitador(char letra);
-int retornarProximaPalavra(FILE *arquivo, char *palavra);
+int retornarProximaPalavra(FILE *arquivo);
 Token Analex();
 
 extern unsigned int linha;
 extern FILE *arquivo;
-
+extern char palavraAtual[100];
 #endif
