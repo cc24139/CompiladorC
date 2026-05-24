@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "headers/basics.h"
-#include "headers/AnalisadorLexico.h"
+#include "basics.h"
+#include "AnalisadorLexico.h"
 /*
 	Integrantes:
 Nome     RA
@@ -113,53 +113,85 @@ int retornarDelimitador(char letra) {
 	return false;
 }
 
-bool retornarProximaPalavra(FILE *arquivo,char *palavra) {
-	int charact;
-	int i =0;
+int retornarProximaPalavra(FILE *arquivo) {
+    int charact;
+    int i = 0;
 
-	while ((charact = fgetc(arquivo)) != EOF && isspace(charact)){
-		if(charact == '\n') {
-			linha++;
-		}
-	};
+    // Pular espaços
+    while ((charact = fgetc(arquivo)) != EOF && isspace(charact)) {
+        if (charact == '\n') {
+            linha++;
+        }
+    }
 
-	if (charact == EOF) {
-		strcpy(palavraAtual, "EOF");
-		return false;
-	}
+    if (charact == EOF) {
+        strcpy(palavraAtual, "EOF");
+        return false;
+    }
 
-	if(ispunct(charact)) {
-		palavra[0] = charact;
-		palavra[1] = '\0';
-		return true;
-	}
+    // =========================
+    // OPERADORES COMPOSTOS
+    // =========================
+    if (charact == ':' || charact == '<' || charact == '>') {
+        int prox = fgetc(arquivo);
 
-	palavra[i++] = charact;
+        if ((charact == ':' && prox == '=') ||
+            (charact == '<' && (prox == '=' || prox == '>')) ||
+            (charact == '>' && prox == '=')) {
 
-	while(retornarDelimitador(charact = fgetc(arquivo) )==0) {
-		if(charact == '\n') {
-			linha++;
-		}
-		palavra[i++] = charact;
-	}
+            palavraAtual[0] = charact;
+            palavraAtual[1] = prox;
+            palavraAtual[2] = '\0';
+        } else {
+            palavraAtual[0] = charact;
+            palavraAtual[1] = '\0';
 
-	palavra[i] = '\0';
+            if (prox != EOF) {
+                ungetc(prox, arquivo);
+            }
+        }
+        return true;
+    }
 
-	//Para no delimitador, mas não perde o caractere
-	if (charact != EOF) {
-		ungetc(charact, arquivo);
-	}
+    // =========================
+    // PONTUAÇÃO SIMPLES
+    // =========================
+    if (ispunct(charact)) {
+        palavraAtual[0] = charact;
+        palavraAtual[1] = '\0';
+        return true;
+    }
 
-	return true;
+    // =========================
+    // PALAVRAS / IDENTIFICADORES
+    // =========================
+    palavraAtual[i++] = charact;
+
+    while ((charact = fgetc(arquivo)) != EOF &&
+           retornarDelimitador(charact) == 0) {
+
+        if (charact == '\n') {
+            linha++;
+        }
+
+        palavraAtual[i++] = charact;
+    }
+
+    palavraAtual[i] = '\0';
+
+    if (charact != EOF) {
+        ungetc(charact, arquivo);
+    }
+
+    return true;
 }
 
 Token Analex()
 {
-	char palavra[100];
-	if(!(retornarProximaPalavra(arquivo,palavra))){
+	if(!(retornarProximaPalavra(arquivo))){
 	    return finalDeArquivo;
 	}
-	if(strcmp(palavra, "EOF") == 0) {
+	if(strcmp(palavraAtual, "EOF") == 0) {
 		return finalDeArquivo;
 	}
 	for (int i = 0; i < NUM_PALAVRAS; i++)
