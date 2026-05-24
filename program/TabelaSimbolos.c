@@ -95,26 +95,3 @@ void LiberarTabela(struct TabelaSimbolos *tabela) {
     free(tabela->tabela);
 }
 
-int main() {
-    struct TabelaSimbolos tabela;
-    inicializarTabela(&tabela);
-    void* valorInt1 = malloc(sizeof(int));
-    *(int *)valorInt1 = 12;
-    struct Simbolo simbolo1 = {"x", "int", 0, valorInt1, mostrarValorInt};
-    struct Simbolo simbolo2 = {"y", "float", 0,  valorInt1, mostrarValorInt};
-    struct Simbolo simbolo3 = {"z", "char", 0,  valorInt1, mostrarValorInt};
-
-    InserirSimbolo(&tabela, simbolo1);
-    InserirSimbolo(&tabela, simbolo2);
-    InserirSimbolo(&tabela, simbolo3);
-
-    ImprimirTabela(&tabela);
-
-    RemoverSimbolo(&tabela, "y");
-
-    printf("\nApós remover o símbolo 'y':\n");
-    ImprimirTabela(&tabela);
-
-    free(tabela.tabela);
-    return 0;
-}
