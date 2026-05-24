@@ -5,9 +5,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-
+/* 
+	Integrantes
+Nomes	RAs
+Daniel	24123
+Luis	24139
+*/
 Token token;
-//assinatura de atribuir bloco para procedimento usar
+//assinaturas de metodos caso ocorra recursão indireta
 void verificaBloco();
 void VerificaComando();
 void VerificaExpressao();
@@ -268,7 +273,7 @@ bool EhBloco() {
 	return Ehrotulo || EhTipo || EhImplicito || EhProcedimento || EhFuncao || EhBegin;
 }
 
-void parametrosFormais(Token tokenComparativo) {
+void parametrosFormais() {
 	while (token == pontoevirgula || token == abreparenteses) {
 		token = Analex();
 		if(token != identificador && token != variavel && token != funcao && token != procedimento) {
@@ -355,10 +360,10 @@ void parametrosFormais(Token tokenComparativo) {
 }
 
 void AtribuirParametosFormais(Token tokenComparativo) {
-	parametrosFormais(tokenComparativo);
+	parametrosFormais();
 	token = Analex(); 
 	if(token != tokenComparativo) {
-		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Erro: esperava-se um ¨%s. Linha: %u, função: %s()\n", linha,tokenString[tokenComparativo] ,__func__);
 		exit(1);
 	}
 }
@@ -380,7 +385,6 @@ void AtribuirFuncao() {
 	
 		AtribuirParametosFormais(doispontos);
 	}
-	
 	if(token != doispontos) {
 		printf("Erro: esperava-se dois pontos (tipo de retorno). Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
@@ -532,37 +536,37 @@ void Atribuirrotulo() {
 
 
 void verificaBloco() {
-	printf("Token encontrado: %s\n", tokenString[token]);
+	while(EhBloco()){
+		while(token == rotulo) {
+			Atribuirrotulo(); 
+			token = Analex();
+		}
 
-	while(token == rotulo) {
-		Atribuirrotulo(); 
-		token = Analex();
-	}
-
-	while(verificaType(token) == true) {
-		AtribuirVariavel(); 
-		token = Analex();   
-	}
-
-
-	while(token == variavel) {
-		AtribuirTipoImplicito(); 
-		token = Analex();       
-	}
+		while(verificaType(token) == true) {
+			AtribuirVariavel(); 
+			token = Analex();   
+		}
 
 
-	while (token == procedimento) {
-		AtribuirProcedimento(); 
-	}
+		while(token == variavel) {
+			AtribuirTipoImplicito(); 
+			token = Analex();       
+		}
 
 
-	while (token == funcao) {
-		AtribuirFuncao(); 
-	}
+		while (token == procedimento) {
+			AtribuirProcedimento(); 
+		}
 
 
-	if(token == inicio) {
-		VerificaComandoSemRotulo();
+		while (token == funcao) {
+			AtribuirFuncao(); 
+		}
+
+
+		if(token == inicio) {
+			VerificaComandoSemRotulo();
+		}
 	}
 }
 
@@ -600,6 +604,11 @@ void verificaProgam() {
 		exit(1);
 	}
 	token = Analex(); 
+	if(!EhBloco()) {
+		printf("Erro: esperava-se um bloco. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
+		exit(1);
+	}
 	verificaBloco();
 	if (token != ponto) {
 		printf("Erro: esperava a palavra ponto!. Linha: %u, função: %s()\n", linha, __func__);

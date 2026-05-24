@@ -1,8 +1,7 @@
+
 program exemplo12(input,output);
-
     var x: integer;
-
-    procedure p(var t: integer);
+    procedure p(var t: integer): integer;
         label 100,200;
         var s: integer;
 
