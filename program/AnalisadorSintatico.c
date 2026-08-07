@@ -1,6 +1,7 @@
 
 #include "basics.h"
 #include "AnalisadorLexico.h"
+#include
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -11,6 +12,7 @@ Nomes	RAs
 Daniel	24123
 Luis	24139
 */
+
 Token token;
 //assinaturas de metodos caso ocorra recursão indireta
 void verificaBloco();

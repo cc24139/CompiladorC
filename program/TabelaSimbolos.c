@@ -1,34 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "headers/basics.h"
+#include "TabelaSimbolos.h"
 
-struct TabelaSimbolos _AumentarTabela(struct TabelaSimbolos *tabela);
-bool BuscarSimbolo(struct TabelaSimbolos *tabela, char* nome);
-bool RemoverSimbolo(struct TabelaSimbolos *tabela, char* nome);
-void ImprimirTabela(struct TabelaSimbolos *tabela);
+static TabelaSimbolos _AumentarTabela(TabelaSimbolos *tabela);
 
-struct Simbolo {
-    char nome[50];
-    char tipo[20];
-    int escopo;
-    void *valor;
-    void (*mostrarValor)(void *valor);
-};
-
-struct TabelaSimbolos {
-    struct Simbolo *tabela;
-    int tamanhoLogico;
-    int tamanho;
-};
-
-void inicializarTabela(struct TabelaSimbolos *tabela){
+void inicializarTabela(TabelaSimbolos *tabela){
     tabela->tamanhoLogico = 0;
     tabela->tamanho = 100;
-    tabela->tabela = (struct Simbolo *)malloc(tabela->tamanho * sizeof(struct Simbolo));
+    tabela->tabela = malloc(tabela->tamanho * sizeof(Simbolo));
 }
 
-bool InserirSimbolo(struct TabelaSimbolos *tabela, struct Simbolo simboloASerInseriddo){
+bool InserirSimbolo(TabelaSimbolos *tabela, Simbolo simboloASerInseriddo){
     if(tabela->tamanhoLogico >= tabela->tamanho) {
         *tabela = _AumentarTabela(tabela);
     }
@@ -41,13 +24,12 @@ bool InserirSimbolo(struct TabelaSimbolos *tabela, struct Simbolo simboloASerIns
 }
 
 bool RemoverUltimoSimbolo(TabelaSimbolos *tabela){
-    if(tabela->tamanhoLogico <= 0)
+    if (tabela->tamanhoLogico <= 0)
         return false;
-    RemoverSimbolo(tabela,tabela->tabela[tabela->tamanhoLogico-1]);
-    return true;
+    return RemoverSimbolo(tabela, tabela->tabela[tabela->tamanhoLogico - 1].nome);
 }
 
-bool BuscarSimbolo(struct TabelaSimbolos *tabela, char* nome) {
+bool BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
         if (strcmp(tabela->tabela[i].nome, nome) == 0) {
             return true;
@@ -56,7 +38,7 @@ bool BuscarSimbolo(struct TabelaSimbolos *tabela, char* nome) {
     return false;
 }
 
-bool RemoverSimbolo(struct TabelaSimbolos *tabela, char* nome) {
+bool RemoverSimbolo(TabelaSimbolos *tabela, char *nome) {
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
         if (strcmp(tabela->tabela[i].nome, nome) == 0) {
             for (int j = i; j < tabela->tamanhoLogico - 1; j++) {
@@ -69,12 +51,12 @@ bool RemoverSimbolo(struct TabelaSimbolos *tabela, char* nome) {
     return false;
 }
 
-struct TabelaSimbolos _AumentarTabela(struct TabelaSimbolos *tabela){
+TabelaSimbolos _AumentarTabela(TabelaSimbolos *tabela){
     tabela->tamanho *= 2;
-    struct TabelaSimbolos novaTabela;
+    TabelaSimbolos novaTabela;
     novaTabela.tamanho = tabela->tamanho;
     novaTabela.tamanhoLogico = tabela->tamanhoLogico;
-    novaTabela.tabela = (struct Simbolo *)malloc(novaTabela.tamanho * sizeof(struct Simbolo));
+    novaTabela.tabela = malloc(novaTabela.tamanho * sizeof(Simbolo));
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
         novaTabela.tabela[i] = tabela->tabela[i];
     }
@@ -82,7 +64,7 @@ struct TabelaSimbolos _AumentarTabela(struct TabelaSimbolos *tabela){
     return novaTabela;
 }
 
-void ImprimirTabela(struct TabelaSimbolos *tabela) {
+void ImprimirTabela(TabelaSimbolos *tabela) {
     printf("Tabela de Simbolos:\n");
     printf("Nome\tTipo\tEscopo\n");
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
@@ -95,7 +77,7 @@ void mostrarValorInt(void *valor) {
     printf("%d\n", *(int *)valor);
 }
 
-void LiberarTabela(struct TabelaSimbolos *tabela) {
+void LiberarTabela(TabelaSimbolos *tabela) {
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
         free(tabela->tabela[i].valor);
     }
