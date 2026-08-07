@@ -378,6 +378,7 @@ void AtribuirFuncao() {
 		printf("Erro: esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	Simbolo simbFunc = GerarSimbolo("funcao", funcao, &tabela, palavraAtual);
 	token = Analex(); 
 	if(token != abreparenteses && token != doispontos) {
 		printf("Erro: esperava-se um parametro formal ou um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
@@ -416,6 +417,7 @@ void AtribuirFuncao() {
 		exit(1);
 	}
 	token = Analex(); 
+	RemoverScopo(&tabela, tabela.ScopoAtual);
 }
 
 
@@ -425,6 +427,8 @@ void AtribuirProcedimento() {
 		printf("Erro: esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	Simbolo simbProc = GerarSimbolo("procedimento", procedimento, &tabela, palavraAtual);
+	InserirSimbolo(&tabela, simbProc);
 	token = Analex();
 	if(token == abreparenteses) {
 		parametrosFormais(pontoevirgula); 
@@ -447,6 +451,7 @@ void AtribuirProcedimento() {
 		exit(1);
 	}
 	token = Analex(); 
+	RemoverScopo(&tabela, tabela.ScopoAtual);
 }
 
 void AtribuirTipoImplicito() {
@@ -461,6 +466,7 @@ void AtribuirTipoImplicito() {
 		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
+	char* nomeVariavel = palavraAtual;
 	token = Analex(); 
 	while(token == virgula) {
 		token = Analex(); 
@@ -480,6 +486,8 @@ void AtribuirTipoImplicito() {
 		printf("Erro: esperava-se um tipo. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	Simbolo simbVariavel = GerarSimbolo(nomeVariavel, token, &tabela, palavraAtual);
+	InserirSimbolo(&tabela, simbVariavel);
 	token = Analex();
 	if(token != pontoevirgula) {
 		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -493,6 +501,7 @@ void AtribuirVariavel() {
 		printf("Erro: Esperava um identificador. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	char* nomeVariavel = palavraAtual;
 	token = Analex();
 	if(token != doispontos) {
 		printf("Erro: Esperava um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
@@ -503,6 +512,8 @@ void AtribuirVariavel() {
 		printf("Erro: Esperava um tipo. Linha: %u, função: %s()\n", linha, __func__);
 		exit(-1);
 	}
+	Simbolo simbVariavel = GerarSimbolo(nomeVariavel, token, &tabela, palavraAtual);
+	InserirSimbolo(&tabela, simbVariavel);
 	token = Analex(); 
 	if(token != pontoevirgula) {
 		printf("Erro: Esperava um pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -571,6 +582,7 @@ void verificaBloco() {
 			VerificaComandoSemRotulo();
 		}
 	}
+	//RemoverUltimoSimbolo(&tabela);
 }
 
 void verificaProgam() {
@@ -623,8 +635,9 @@ int main() {
 	arquivo = fopen("arq.txt", "r");
 	token = Analex();
 	inicializarTabela(&tabela);
+	verificaProgam();
 	ImprimirTabela(&tabela);
-	
-	//verificaProgam();
-	//printf("Programa sintaticamente correto!\n");
+	RemoverScopo(&tabela, tabela.ScopoAtual);
+	ImprimirTabela(&tabela);
+	printf("Programa sintaticamente correto!\n");
 }

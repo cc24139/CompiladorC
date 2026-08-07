@@ -22,6 +22,7 @@ typedef struct TabelaSimbolos {
     int ScopoAtual;
 } TabelaSimbolos;
 
+Simbolo GerarSimbolo(char *nome, Token token, TabelaSimbolos *tabela, void *valor);
 void inicializarTabela(TabelaSimbolos *tabela);
 bool InserirSimbolo(TabelaSimbolos *tabela, Simbolo simboloASerInseriddo);
 bool RemoverUltimoSimbolo(TabelaSimbolos *tabela);
@@ -30,6 +31,8 @@ bool RemoverSimbolo(TabelaSimbolos *tabela, char *nome);
 void ImprimirTabela(TabelaSimbolos *tabela);
 void mostrarValorInt(void *valor);
 void LiberarTabela(TabelaSimbolos *tabela);
+
+void RemoverScopo(TabelaSimbolos *tabela, int escopo);
 
 #endif
 

@@ -13,10 +13,11 @@ void inicializarTabela(TabelaSimbolos *tabela){
     tabela->tabela = malloc(tabela->tamanho * sizeof(Simbolo));
 }
 
-Simbolo GerarSimbolo (char *nome, Token tipo,TabelaSimbolos *tabela) {
+Simbolo GerarSimbolo (char *nome, Token tipo,TabelaSimbolos *tabela, void *valor) {
     Simbolo simbolo;
     strcpy(simbolo.nome, nome);
     simbolo.token = tipo;
+    simbolo.valor = valor;
     if(simbolo.token == funcao || simbolo.token == procedimento) {
         tabela->ScopoAtual++;
         simbolo.escopo = tabela->ScopoAtual;
@@ -55,7 +56,7 @@ bool BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
 }
 
 //Como é adicionado numa pilha o escopo atual fica no final do vetor
-static void RemoverScopo(TabelaSimbolos *tabela, int escopo){
+void RemoverScopo(TabelaSimbolos *tabela, int escopo){
     for (int i = tabela->tamanhoLogico - 1; i >= 0; i--) {
         if (tabela->tabela[i].escopo == escopo) {
             RemoverSimbolo(tabela, tabela->tabela[i].nome);
@@ -69,6 +70,7 @@ static void RemoverScopo(TabelaSimbolos *tabela, int escopo){
 }
 
 bool RemoverSimbolo(TabelaSimbolos *tabela, char *nome) {
+    ImprimirTabela(tabela);
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
         if (strcmp(tabela->tabela[i].nome, nome) == 0) {
             for (int j = i; j < tabela->tamanhoLogico - 1; j++) {
@@ -98,14 +100,12 @@ void ImprimirTabela(TabelaSimbolos *tabela) {
     printf("Tabela de Simbolos:\n");
     printf("Nome\tTipo\tEscopo\n");
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
-        printf("%s\t%s\t%d ", tabela->tabela[i].nome, tabela->tabela[i].token, tabela->tabela[i].escopo);
-        tabela->tabela[i].mostrarValor(tabela->tabela[i].valor);
+        printf("%s\t%s\t%d ", tabela->tabela[i].nome, tokenString[tabela->tabela[i].token], tabela->tabela[i].escopo);
+        printf("%s\n", (char *)tabela->tabela[i].valor);
     }
 }
 
-void mostrarValorInt(void *valor) {
-    printf("%d\n", *(int *)valor);
-}
+
 
 void LiberarTabela(TabelaSimbolos *tabela) {
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
