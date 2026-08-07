@@ -1,7 +1,7 @@
 
 #include "basics.h"
 #include "AnalisadorLexico.h"
-#include
+#include "TabelaSimbolos.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -14,6 +14,7 @@ Luis	24139
 */
 
 Token token;
+TabelaSimbolos tabela;
 //assinaturas de metodos caso ocorra recursão indireta
 void verificaBloco();
 void VerificaComando();
@@ -621,6 +622,10 @@ void verificaProgam() {
 int main() {
 	arquivo = fopen("arq.txt", "r");
 	token = Analex();
-	verificaProgam();
-	printf("Programa sintaticamente correto!\n");
+	inicializarTabela(&tabela);
+	ImprimirTabela(&tabela);
+	Simbolo simb = Simbolo();
+	InserirSimbolo(&tabela);
+	//verificaProgam();
+	//printf("Programa sintaticamente correto!\n");
 }

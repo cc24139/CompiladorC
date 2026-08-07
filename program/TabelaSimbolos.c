@@ -2,20 +2,36 @@
 #include <string.h>
 #include <stdlib.h>
 #include "TabelaSimbolos.h"
+#include "AnalisadorLexico.h"
 
 static TabelaSimbolos _AumentarTabela(TabelaSimbolos *tabela);
 
 void inicializarTabela(TabelaSimbolos *tabela){
     tabela->tamanhoLogico = 0;
     tabela->tamanho = 100;
+    tabela->ScopoAtual = 0;
     tabela->tabela = malloc(tabela->tamanho * sizeof(Simbolo));
 }
+
+Simbolo GerarSimbolo (char *nome, Token tipo,TabelaSimbolos *tabela) {
+    Simbolo simbolo;
+    strcpy(simbolo.nome, nome);
+    simbolo.token = tipo;
+    if(simbolo.token == funcao || simbolo.token == procedimento) {
+        tabela->ScopoAtual++;
+        simbolo.escopo = tabela->ScopoAtual;
+    }else{
+        simbolo.escopo = tabela->ScopoAtual;
+    }
+    return simbolo;
+}
+
+
 
 bool InserirSimbolo(TabelaSimbolos *tabela, Simbolo simboloASerInseriddo){
     if(tabela->tamanhoLogico >= tabela->tamanho) {
         *tabela = _AumentarTabela(tabela);
     }
-    if (!BuscarSimbolo(tabela, simboloASerInseriddo.nome)) {
         tabela->tabela[tabela->tamanhoLogico] = simboloASerInseriddo;
         tabela->tamanhoLogico++;
         return true;

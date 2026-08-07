@@ -4,11 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "AnalisadorLexico.h"
 #include "basics.h"
 
 typedef struct Simbolo {
     char nome[50];
-    char tipo[20];
+    Token token;
     int escopo;
     void *valor;
     void (*mostrarValor)(void *valor);
@@ -18,6 +19,7 @@ typedef struct TabelaSimbolos {
     Simbolo *tabela;
     int tamanhoLogico;
     int tamanho;
+    int ScopoAtual;
 } TabelaSimbolos;
 
 void inicializarTabela(TabelaSimbolos *tabela);
