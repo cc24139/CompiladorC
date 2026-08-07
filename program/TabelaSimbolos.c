@@ -40,6 +40,13 @@ bool InserirSimbolo(struct TabelaSimbolos *tabela, struct Simbolo simboloASerIns
     return false;
 }
 
+bool RemoverUltimoSimbolo(TabelaSimbolos *tabela){
+    if(tabela->tamanhoLogico <= 0)
+        return false;
+    RemoverSimbolo(tabela,tabela->tabela[tabela->tamanhoLogico-1]);
+    return true;
+}
+
 bool BuscarSimbolo(struct TabelaSimbolos *tabela, char* nome) {
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
         if (strcmp(tabela->tabela[i].nome, nome) == 0) {
