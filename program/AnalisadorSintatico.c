@@ -624,8 +624,7 @@ int main() {
 	token = Analex();
 	inicializarTabela(&tabela);
 	ImprimirTabela(&tabela);
-	Simbolo simb = Simbolo();
-	InserirSimbolo(&tabela);
+	
 	//verificaProgam();
 	//printf("Programa sintaticamente correto!\n");
 }

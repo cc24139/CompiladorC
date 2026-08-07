@@ -35,9 +35,9 @@ bool InserirSimbolo(TabelaSimbolos *tabela, Simbolo simboloASerInseriddo){
         tabela->tabela[tabela->tamanhoLogico] = simboloASerInseriddo;
         tabela->tamanhoLogico++;
         return true;
-    }
     return false;
 }
+
 
 bool RemoverUltimoSimbolo(TabelaSimbolos *tabela){
     if (tabela->tamanhoLogico <= 0)
@@ -52,6 +52,20 @@ bool BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
         }
     }
     return false;
+}
+
+//Como é adicionado numa pilha o escopo atual fica no final do vetor
+static void RemoverScopo(TabelaSimbolos *tabela, int escopo){
+    for (int i = tabela->tamanhoLogico - 1; i >= 0; i--) {
+        if (tabela->tabela[i].escopo == escopo) {
+            RemoverSimbolo(tabela, tabela->tabela[i].nome);
+        }
+        else{
+            //escopo desejado já foi limpo
+            tabela->ScopoAtual--;
+            break;
+        }
+    }
 }
 
 bool RemoverSimbolo(TabelaSimbolos *tabela, char *nome) {
@@ -84,7 +98,7 @@ void ImprimirTabela(TabelaSimbolos *tabela) {
     printf("Tabela de Simbolos:\n");
     printf("Nome\tTipo\tEscopo\n");
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
-        printf("%s\t%s\t%d ", tabela->tabela[i].nome, tabela->tabela[i].tipo, tabela->tabela[i].escopo);
+        printf("%s\t%s\t%d ", tabela->tabela[i].nome, tabela->tabela[i].token, tabela->tabela[i].escopo);
         tabela->tabela[i].mostrarValor(tabela->tabela[i].valor);
     }
 }
