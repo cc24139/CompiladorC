@@ -362,13 +362,10 @@ void parametrosFormais() {
 	}
 }
 
-void AtribuirParametosFormais(Token tokenComparativo) {
+void AtribuirParametosFormais() {
 	parametrosFormais();
-	token = Analex(); 
-	if(token != tokenComparativo) {
-		printf("Erro: esperava-se um ¨%s. Linha: %u, função: %s()\n", linha,tokenString[tokenComparativo] ,__func__);
-		exit(1);
-	}
+	token = Analex();
+	
 }
 
 
@@ -387,7 +384,7 @@ void AtribuirFuncao() {
 	}
 	if(token == abreparenteses) {
 	
-		AtribuirParametosFormais(doispontos);
+		AtribuirParametosFormais();
 	}
 	if(token != doispontos) {
 		printf("Erro: esperava-se dois pontos (tipo de retorno). Linha: %u, função: %s()\n", linha, __func__);
@@ -431,11 +428,11 @@ void AtribuirProcedimento() {
 	InserirSimbolo(&tabela, simbProc);
 	token = Analex();
 	if(token == abreparenteses) {
-		parametrosFormais(pontoevirgula); 
-		token = Analex(); 
+		AtribuirParametosFormais();
 	}
 	if(token != pontoevirgula) {
 		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
+		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
 	token = Analex();
@@ -527,6 +524,8 @@ void Atribuirrotulo() {
 		printf("Erro: esperava a palavra numero!. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	Simbolo simbolo = GerarSimbolo("Rotulo",rotulo,&tabela,palavraAtual);
+	InserirSimbolo(&tabela,simbolo);
 	token = Analex(); 
 	if (token != virgula && token != pontoevirgula) {
 		printf("Erro: esperava a palavra virgula ou pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -539,11 +538,14 @@ void Atribuirrotulo() {
 			printf("Erro: esperava a palavra numero. Linha: %u, função: %s()\n", linha, __func__);
 			exit(1);
 		}
+		Simbolo simbolo = GerarSimbolo("Rotulo",rotulo,&tabela,palavraAtual);
+		InserirSimbolo(&tabela,simbolo);
 		token = Analex(); 
 		if (token != virgula && token != pontoevirgula) {
 			printf("Erro: esperava a palavra virgula ou pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
 			exit(1);
 		}
+
 	}
 
 }

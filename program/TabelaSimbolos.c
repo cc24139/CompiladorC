@@ -55,7 +55,7 @@ bool BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
     return false;
 }
 
-//Como é adicionado numa pilha o escopo atual fica no final do vetor
+//Como é adicionado em forma de pilha o escopo atual fica no final do vetor
 void RemoverScopo(TabelaSimbolos *tabela, int escopo){
     for (int i = tabela->tamanhoLogico - 1; i >= 0; i--) {
         if (tabela->tabela[i].escopo == escopo) {
