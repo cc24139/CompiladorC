@@ -8,7 +8,7 @@
 #include "basics.h"
 
 typedef struct Simbolo {
-    char nome[50];
+    char nome[100];
     Token token;
     int escopo;
     void *valor;

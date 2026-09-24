@@ -291,6 +291,8 @@ void parametrosFormais() {
 			}
 		}
 		if (token == identificador) {
+			int primeiro = tabela.tamanhoLogico;
+			InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 			token = Analex();
 			if(token != doispontos) {
 				printf("Erro: Esperava-se um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
@@ -301,6 +303,10 @@ void parametrosFormais() {
 				printf("Erro: Esperava-se um tipo. Linha: %u, função: %s()\n", linha, __func__);
 				exit(-1);
 			}
+			tabela.tabela[primeiro].valor = malloc(strlen(palavraAtual) + 1);
+			if(tabela.tabela[primeiro].valor == NULL)
+				exit(EXIT_FAILURE);
+			strcpy(tabela.tabela[primeiro].valor, palavraAtual);
 			token = Analex();
 			while(token == virgula) {
 				token = Analex();
@@ -308,15 +314,18 @@ void parametrosFormais() {
 					printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 					exit(-1);
 				}
+				InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, tabela.tabela[primeiro].valor));
 				token = Analex();
 			}
 		}
 		if(token == funcao) {
+			int primeiro = tabela.tamanhoLogico;
 			token = Analex();
 			if(token != identificador) {
 				printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 				exit(-1);
 			}
+			InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, funcao, &tabela, NULL));
 			token = Analex();
 			while(token == virgula) {
 				token = Analex();
@@ -324,6 +333,7 @@ void parametrosFormais() {
 					printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 					exit(-1);
 				}
+				InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, funcao, &tabela, NULL));
 				token = Analex();
 			}
 			if(token != doispontos) {
@@ -335,6 +345,12 @@ void parametrosFormais() {
 				printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 				exit(-1);
 			}
+			for(int i = primeiro; i < tabela.tamanhoLogico; i++) {
+				tabela.tabela[i].valor = malloc(strlen(palavraAtual) + 1);
+				if(tabela.tabela[i].valor == NULL)
+					exit(EXIT_FAILURE);
+				strcpy(tabela.tabela[i].valor, palavraAtual);
+			}
 			token = Analex();
 		}
 		if(token == procedimento) {
@@ -343,6 +359,7 @@ void parametrosFormais() {
 				printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 				exit(-1);
 			}
+			InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, procedimento, &tabela, NULL));
 			token = Analex();
 			while (token == virgula)
 			{
@@ -351,6 +368,7 @@ void parametrosFormais() {
 					printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 					exit(-1);
 				}
+				InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, procedimento, &tabela, NULL));
 				token = Analex();
 			}
 		}
@@ -375,7 +393,10 @@ void AtribuirFuncao() {
 		printf("Erro: esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
-	Simbolo simbFunc = GerarSimbolo("funcao", funcao, &tabela, palavraAtual);
+	int indiceFuncao = tabela.tamanhoLogico;
+	Simbolo simbFunc = GerarSimbolo(palavraAtual, funcao, &tabela, NULL);
+	InserirSimbolo(&tabela, simbFunc);
+	tabela.ScopoAtual++;
 	token = Analex(); 
 	if(token != abreparenteses && token != doispontos) {
 		printf("Erro: esperava-se um parametro formal ou um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
@@ -395,6 +416,10 @@ void AtribuirFuncao() {
 		printf("Erro: esperava-se um identificador (tipo de retorno). Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	tabela.tabela[indiceFuncao].valor = malloc(strlen(palavraAtual) + 1);
+	if(tabela.tabela[indiceFuncao].valor == NULL)
+		exit(EXIT_FAILURE);
+	strcpy(tabela.tabela[indiceFuncao].valor, palavraAtual);
 	token = Analex(); 
 	if(token != pontoevirgula) {
 		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -424,8 +449,9 @@ void AtribuirProcedimento() {
 		printf("Erro: esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
-	Simbolo simbProc = GerarSimbolo("procedimento", procedimento, &tabela, palavraAtual);
+	Simbolo simbProc = GerarSimbolo(palavraAtual, procedimento, &tabela, NULL);
 	InserirSimbolo(&tabela, simbProc);
+	tabela.ScopoAtual++;
 	token = Analex();
 	if(token == abreparenteses) {
 		AtribuirParametosFormais();
@@ -463,7 +489,8 @@ void AtribuirTipoImplicito() {
 		printf("Token encontrado: %s\n", tokenString[token]);
 		exit(1);
 	}
-	char* nomeVariavel = palavraAtual;
+	int primeiro = tabela.tamanhoLogico;
+	InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 	token = Analex(); 
 	while(token == virgula) {
 		token = Analex(); 
@@ -472,6 +499,7 @@ void AtribuirTipoImplicito() {
 			printf("Token encontrado: %s\n", tokenString[token]);
 			exit(1);
 		}
+		InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 		token = Analex(); 
 	}
 	if(token != doispontos) {
@@ -483,8 +511,12 @@ void AtribuirTipoImplicito() {
 		printf("Erro: esperava-se um tipo. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
-	Simbolo simbVariavel = GerarSimbolo(nomeVariavel, token, &tabela, palavraAtual);
-	InserirSimbolo(&tabela, simbVariavel);
+	for(int i = primeiro; i < tabela.tamanhoLogico; i++) {
+		tabela.tabela[i].valor = malloc(strlen(palavraAtual) + 1);
+		if(tabela.tabela[i].valor == NULL)
+			exit(EXIT_FAILURE);
+		strcpy(tabela.tabela[i].valor, palavraAtual);
+	}
 	token = Analex();
 	if(token != pontoevirgula) {
 		printf("Erro: esperava-se um ponto e virgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -498,7 +530,8 @@ void AtribuirVariavel() {
 		printf("Erro: Esperava um identificador. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
-	char* nomeVariavel = palavraAtual;
+	int primeiro = tabela.tamanhoLogico;
+	InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 	token = Analex();
 	if(token != doispontos) {
 		printf("Erro: Esperava um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
@@ -509,8 +542,10 @@ void AtribuirVariavel() {
 		printf("Erro: Esperava um tipo. Linha: %u, função: %s()\n", linha, __func__);
 		exit(-1);
 	}
-	Simbolo simbVariavel = GerarSimbolo(nomeVariavel, token, &tabela, palavraAtual);
-	InserirSimbolo(&tabela, simbVariavel);
+	tabela.tabela[primeiro].valor = malloc(strlen(palavraAtual) + 1);
+	if(tabela.tabela[primeiro].valor == NULL)
+		exit(EXIT_FAILURE);
+	strcpy(tabela.tabela[primeiro].valor, palavraAtual);
 	token = Analex(); 
 	if(token != pontoevirgula) {
 		printf("Erro: Esperava um pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -524,7 +559,7 @@ void Atribuirrotulo() {
 		printf("Erro: esperava a palavra numero!. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
-	Simbolo simbolo = GerarSimbolo("Rotulo",rotulo,&tabela,palavraAtual);
+	Simbolo simbolo = GerarSimbolo(palavraAtual,rotulo,&tabela,NULL);
 	InserirSimbolo(&tabela,simbolo);
 	token = Analex(); 
 	if (token != virgula && token != pontoevirgula) {
@@ -538,7 +573,7 @@ void Atribuirrotulo() {
 			printf("Erro: esperava a palavra numero. Linha: %u, função: %s()\n", linha, __func__);
 			exit(1);
 		}
-		Simbolo simbolo = GerarSimbolo("Rotulo",rotulo,&tabela,palavraAtual);
+		Simbolo simbolo = GerarSimbolo(palavraAtual,rotulo,&tabela,NULL);
 		InserirSimbolo(&tabela,simbolo);
 		token = Analex(); 
 		if (token != virgula && token != pontoevirgula) {
@@ -598,6 +633,7 @@ void verificaProgam() {
 		printf("Erro: esperava a palavra identificador!. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
+	InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, programa, &tabela, NULL));
 	token = Analex(); 
 	if (token != abreparenteses) {
 		printf("Erro: esperava a palavra abreParenteses!. Linha: %u, função: %s()\n", linha, __func__);
@@ -609,6 +645,7 @@ void verificaProgam() {
 			printf("Erro: esperava a palavra identificador!. Linha: %u, função: %s()\n", linha, __func__);
 			exit(1);
 		}
+		InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, identificador, &tabela, NULL));
 		token = Analex();
 		if (token != virgula && token != fechaparenteses) {
 			printf("Erro: esperava a palavra virgula ou fechaparenteses!. Linha: %u, função: %s()\n", linha, __func__);
@@ -641,5 +678,7 @@ int main() {
 	ImprimirTabela(&tabela);
 	RemoverScopo(&tabela, tabela.ScopoAtual);
 	ImprimirTabela(&tabela);
+	LiberarTabela(&tabela);
+	fclose(arquivo);
 	printf("Programa sintaticamente correto!\n");
 }
