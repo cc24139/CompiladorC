@@ -117,16 +117,73 @@ int retornarProximaPalavra(FILE *arquivo) {
     int charact;
     int i = 0;
 
-    // Pular espaços
-    while ((charact = fgetc(arquivo)) != EOF && isspace(charact)) {
-        if (charact == '\n') {
-            linha++;
-        }
-    }
+    while (1) {
 
-    if (charact == EOF) {
-        strcpy(palavraAtual, "EOF");
-        return false;
+        // Pular espaços
+        while ((charact = fgetc(arquivo)) != EOF && isspace(charact)) {
+            if (charact == '\n') {
+                linha++;
+            }
+        }
+
+        if (charact == EOF) {
+            strcpy(palavraAtual, "EOF");
+            return false;
+        }
+
+        // =========================
+        // COMENTÁRIOS (* ... *)
+        // =========================
+        if (charact == '(') {
+
+            int prox = fgetc(arquivo);
+
+            if (prox == '*') {
+
+                int anterior = 0;
+
+                while ((charact = fgetc(arquivo)) != EOF) {
+
+                    if (charact == '\n') {
+                        linha++;
+                    }
+
+                    if (anterior == '*' && charact == ')') {
+                        break;
+                    }
+
+                    anterior = charact;
+                }
+
+                if (charact == EOF) {
+                    printf("Erro: comentario nao fechado. Linha: %u\n", linha);
+                    return false;
+                }
+
+                /*
+                    O comentário foi ignorado.
+                    Volta ao começo para procurar o próximo token.
+                */
+                continue;
+            }
+
+            /*
+                Não era comentário.
+
+                Devolve o caractere lido depois do '('
+                para ele ser analisado normalmente.
+            */
+            if (prox != EOF) {
+                ungetc(prox, arquivo);
+            }
+
+            palavraAtual[0] = '(';
+            palavraAtual[1] = '\0';
+
+            return true;
+        }
+
+        break;
     }
 
     // =========================
@@ -142,7 +199,9 @@ int retornarProximaPalavra(FILE *arquivo) {
             palavraAtual[0] = charact;
             palavraAtual[1] = prox;
             palavraAtual[2] = '\0';
+
         } else {
+
             palavraAtual[0] = charact;
             palavraAtual[1] = '\0';
 
@@ -150,6 +209,7 @@ int retornarProximaPalavra(FILE *arquivo) {
                 ungetc(prox, arquivo);
             }
         }
+
         return true;
     }
 
@@ -191,9 +251,11 @@ Token Analex()
 	if(!(retornarProximaPalavra(arquivo))){
 	    return finalDeArquivo;
 	}
+
 	if(strcmp(palavraAtual, "EOF") == 0) {
 		return finalDeArquivo;
 	}
+
 	for (int i = 0; i < NUM_PALAVRAS; i++)
 	{
 		if (strcmp(palavraAtual, palavras[i]) == 0)
@@ -217,6 +279,7 @@ Token Analex()
     				return invalido;
     			}
     		}
+
     		return identificador;
 		}
 	}
@@ -229,8 +292,10 @@ Token Analex()
 				return invalido;
 			}
 		}
+
 		return numero;
 	}
+
 	return invalido;
 }
 
@@ -243,15 +308,21 @@ int main()
 {
 	arquivo = fopen("./arq.txt", "r");
 	printf("Analisador Léxico\n");
+
 	Token token = Analex();
+
 	while(token != finalDeArquivo) {
+
 	    if(token == invalido){
 		    printf("token inválido! linha: %d", linha);
 		    return 1;
 	    }
-		printf("%s \n",tokenString[token]);
-		token = Analex();
 
-	}
 		printf("%s \n",tokenString[token]);
-}*/
+
+		token = Analex();
+	}
+
+	printf("%s \n",tokenString[token]);
+}
+*/

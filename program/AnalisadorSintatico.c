@@ -20,6 +20,30 @@ void verificaBloco();
 void VerificaComando();
 void VerificaExpressao();
 
+static Simbolo *BuscarSimboloVisivel(char *nome) {
+	for(int i = tabela.tamanhoLogico - 1; i >= 0; i--) {
+		if(strcmp(tabela.tabela[i].nome, nome) == 0)
+			return &tabela.tabela[i];
+	}
+	return NULL;
+}
+
+static Simbolo *BuscarRotuloVisivel(char *nome) {
+	for(int i = tabela.tamanhoLogico - 1; i >= 0; i--) {
+		if(tabela.tabela[i].token == rotulo && strcmp(tabela.tabela[i].nome, nome) == 0)
+			return &tabela.tabela[i];
+	}
+	return NULL;
+}
+
+static void InserirSimboloOuErro(Simbolo simbolo) {
+	if(!InserirSimbolo(&tabela, simbolo)) {
+		printf("Erro: identificador '%s' já declarado neste escopo. Linha: %u, função: %s()\n",
+			simbolo.nome, linha, __func__);
+		exit(1);
+	}
+}
+
 bool verificaType(Token token) {
 	if(strcmp(palavraAtual, "integer") == 0)
 		return true;
@@ -54,8 +78,19 @@ void Fator() {
 		return;
 	}
 	if(token == identificador) {
+		Simbolo *simbolo = BuscarSimboloVisivel(palavraAtual);
+		if(simbolo == NULL) {
+			printf("Erro: identificador '%s' não declarado. Linha: %u, função: %s()\n", palavraAtual, linha, __func__);
+			exit(-1);
+		}
+
 		token = Analex(); 
 		if(token == abreparenteses) {
+			if(simbolo->token != funcao) {
+				printf("Erro: identificador '%s' não é uma função. Linha: %u, função: %s()\n", simbolo->nome, linha, __func__);
+				exit(-1);
+			}
+
 			token = Analex(); 
 			if(token != fechaparenteses) {
 				VerificaExpressao();
@@ -72,6 +107,11 @@ void Fator() {
 			return;
 		}
 		if (token == abrecolchetes) {
+			if(simbolo->token != variavel) {
+				printf("Erro: identificador '%s' não é uma variável. Linha: %u, função: %s()\n", simbolo->nome, linha, __func__);
+				exit(-1);
+			}
+
 			token = Analex(); 
 			VerificaExpressao();
 			while(token == virgula) {
@@ -84,6 +124,11 @@ void Fator() {
 			}
 			token = Analex();
 			return;
+		}
+
+		if(simbolo->token == procedimento || simbolo->token == rotulo || simbolo->token == programa) {
+			printf("Erro: identificador '%s' não pode ser usado em uma expressão. Linha: %u, função: %s()\n", simbolo->nome, linha, __func__);
+			exit(-1);
 		}
 		return;
 	}
@@ -141,9 +186,20 @@ void VerificaComandoSemRotulo()
 {
 	if(token == identificador)
 	{
+		Simbolo *simbolo = BuscarSimboloVisivel(palavraAtual);
+		if(simbolo == NULL) {
+			printf("Erro: identificador '%s' não declarado. Linha: %u, função: %s()\n", palavraAtual, linha, __func__);
+			exit(-1);
+		}
+
 		token = Analex();
 		if (token == abrecolchetes)
 		{
+			if(simbolo->token != variavel) {
+				printf("Erro: identificador '%s' não é uma variável. Linha: %u, função: %s()\n", simbolo->nome, linha, __func__);
+				exit(-1);
+			}
+
 			token = Analex();
 			VerificaExpressao();
 			while(token == virgula)
@@ -160,11 +216,21 @@ void VerificaComandoSemRotulo()
 		}
 		if(token == atribuicao)
 		{
+			if(simbolo->token != variavel && simbolo->token != funcao) {
+				printf("Erro: identificador '%s' não pode receber atribuição. Linha: %u, função: %s()\n", simbolo->nome, linha, __func__);
+				exit(-1);
+			}
+
 			token = Analex();
 			VerificaExpressao();
 		}
 		else if(token == abreparenteses)
 		{
+			if(simbolo->token != procedimento) {
+				printf("Erro: identificador '%s' não é um procedimento. Linha: %u, função: %s()\n", simbolo->nome, linha, __func__);
+				exit(-1);
+			}
+
 			token = Analex(); 
 			if(token != fechaparenteses) {
 				VerificaExpressao();
@@ -188,6 +254,10 @@ void VerificaComandoSemRotulo()
 		if (token != numero)
 		{
 			printf("Erro: Esperava-se um número. Linha: %u, função: %s()\n", linha, __func__);
+			exit(-1);
+		}
+		if(BuscarRotuloVisivel(palavraAtual) == NULL) {
+			printf("Erro: rótulo '%s' não declarado. Linha: %u, função: %s()\n", palavraAtual, linha, __func__);
 			exit(-1);
 		}
 		token = Analex(); 
@@ -247,6 +317,11 @@ void VerificaComandoSemRotulo()
 void VerificaComando()
 {
 	token = Analex(); 
+	
+	if(token == fim) {
+        return;
+    }
+	
 	if(token != numero && token != identificador && token != vapara &&
 	   token != inicio && token != se && token != enquanto) {
 		printf("Erro: Esperava-se um número ou comando sem rótulo. Linha: %u, função: %s()\n", linha, __func__);
@@ -254,6 +329,11 @@ void VerificaComando()
 	}
 	
 	if(token == numero) {
+		if(BuscarRotuloVisivel(palavraAtual) == NULL) {
+			printf("Erro: rótulo '%s' não declarado. Linha: %u, função: %s()\n", palavraAtual, linha, __func__);
+			exit(-1);
+		}
+
 		token = Analex();
 		if (token != doispontos)
 		{
@@ -292,7 +372,7 @@ void parametrosFormais() {
 		}
 		if (token == identificador) {
 			int primeiro = tabela.tamanhoLogico;
-			InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
+			InserirSimboloOuErro(GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 			token = Analex();
 			if(token != doispontos) {
 				printf("Erro: Esperava-se um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
@@ -314,7 +394,7 @@ void parametrosFormais() {
 					printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 					exit(-1);
 				}
-				InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, tabela.tabela[primeiro].valor));
+				InserirSimboloOuErro(GerarSimbolo(palavraAtual, variavel, &tabela, tabela.tabela[primeiro].valor));
 				token = Analex();
 			}
 		}
@@ -325,7 +405,7 @@ void parametrosFormais() {
 				printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 				exit(-1);
 			}
-			InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, funcao, &tabela, NULL));
+			InserirSimboloOuErro(GerarSimbolo(palavraAtual, funcao, &tabela, NULL));
 			token = Analex();
 			while(token == virgula) {
 				token = Analex();
@@ -333,7 +413,7 @@ void parametrosFormais() {
 					printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 					exit(-1);
 				}
-				InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, funcao, &tabela, NULL));
+				InserirSimboloOuErro(GerarSimbolo(palavraAtual, funcao, &tabela, NULL));
 				token = Analex();
 			}
 			if(token != doispontos) {
@@ -359,7 +439,7 @@ void parametrosFormais() {
 				printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 				exit(-1);
 			}
-			InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, procedimento, &tabela, NULL));
+			InserirSimboloOuErro(GerarSimbolo(palavraAtual, procedimento, &tabela, NULL));
 			token = Analex();
 			while (token == virgula)
 			{
@@ -368,7 +448,7 @@ void parametrosFormais() {
 					printf("Erro: Esperava-se um identificador. Linha: %u, função: %s()\n", linha, __func__);
 					exit(-1);
 				}
-				InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, procedimento, &tabela, NULL));
+				InserirSimboloOuErro(GerarSimbolo(palavraAtual, procedimento, &tabela, NULL));
 				token = Analex();
 			}
 		}
@@ -395,7 +475,7 @@ void AtribuirFuncao() {
 	}
 	int indiceFuncao = tabela.tamanhoLogico;
 	Simbolo simbFunc = GerarSimbolo(palavraAtual, funcao, &tabela, NULL);
-	InserirSimbolo(&tabela, simbFunc);
+	InserirSimboloOuErro(simbFunc);
 	tabela.ScopoAtual++;
 	token = Analex(); 
 	if(token != abreparenteses && token != doispontos) {
@@ -450,7 +530,7 @@ void AtribuirProcedimento() {
 		exit(1);
 	}
 	Simbolo simbProc = GerarSimbolo(palavraAtual, procedimento, &tabela, NULL);
-	InserirSimbolo(&tabela, simbProc);
+	InserirSimboloOuErro(simbProc);
 	tabela.ScopoAtual++;
 	token = Analex();
 	if(token == abreparenteses) {
@@ -490,7 +570,7 @@ void AtribuirTipoImplicito() {
 		exit(1);
 	}
 	int primeiro = tabela.tamanhoLogico;
-	InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
+	InserirSimboloOuErro(GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 	token = Analex(); 
 	while(token == virgula) {
 		token = Analex(); 
@@ -499,7 +579,7 @@ void AtribuirTipoImplicito() {
 			printf("Token encontrado: %s\n", tokenString[token]);
 			exit(1);
 		}
-		InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
+		InserirSimboloOuErro(GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 		token = Analex(); 
 	}
 	if(token != doispontos) {
@@ -531,7 +611,7 @@ void AtribuirVariavel() {
 		exit(1);
 	}
 	int primeiro = tabela.tamanhoLogico;
-	InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
+	InserirSimboloOuErro(GerarSimbolo(palavraAtual, variavel, &tabela, NULL));
 	token = Analex();
 	if(token != doispontos) {
 		printf("Erro: Esperava um dois pontos. Linha: %u, função: %s()\n", linha, __func__);
@@ -560,7 +640,7 @@ void Atribuirrotulo() {
 		exit(1);
 	}
 	Simbolo simbolo = GerarSimbolo(palavraAtual,rotulo,&tabela,NULL);
-	InserirSimbolo(&tabela,simbolo);
+	InserirSimboloOuErro(simbolo);
 	token = Analex(); 
 	if (token != virgula && token != pontoevirgula) {
 		printf("Erro: esperava a palavra virgula ou pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -574,7 +654,7 @@ void Atribuirrotulo() {
 			exit(1);
 		}
 		Simbolo simbolo = GerarSimbolo(palavraAtual,rotulo,&tabela,NULL);
-		InserirSimbolo(&tabela,simbolo);
+		InserirSimboloOuErro(simbolo);
 		token = Analex(); 
 		if (token != virgula && token != pontoevirgula) {
 			printf("Erro: esperava a palavra virgula ou pontoEVirgula. Linha: %u, função: %s()\n", linha, __func__);
@@ -633,7 +713,7 @@ void verificaProgam() {
 		printf("Erro: esperava a palavra identificador!. Linha: %u, função: %s()\n", linha, __func__);
 		exit(1);
 	}
-	InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, programa, &tabela, NULL));
+	InserirSimboloOuErro(GerarSimbolo(palavraAtual, programa, &tabela, NULL));
 	token = Analex(); 
 	if (token != abreparenteses) {
 		printf("Erro: esperava a palavra abreParenteses!. Linha: %u, função: %s()\n", linha, __func__);
@@ -645,7 +725,7 @@ void verificaProgam() {
 			printf("Erro: esperava a palavra identificador!. Linha: %u, função: %s()\n", linha, __func__);
 			exit(1);
 		}
-		InserirSimbolo(&tabela, GerarSimbolo(palavraAtual, identificador, &tabela, NULL));
+		InserirSimboloOuErro(GerarSimbolo(palavraAtual, identificador, &tabela, NULL));
 		token = Analex();
 		if (token != virgula && token != fechaparenteses) {
 			printf("Erro: esperava a palavra virgula ou fechaparenteses!. Linha: %u, função: %s()\n", linha, __func__);
