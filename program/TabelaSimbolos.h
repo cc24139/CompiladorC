@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "AnalisadorLexico.h"
+#include "AnalisadorLexico.h"
 #include "basics.h"
 
 typedef struct Simbolo {

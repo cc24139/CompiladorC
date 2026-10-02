@@ -3,14 +3,19 @@
 #include <stdlib.h>
 #include "TabelaSimbolos.h"
 #include "AnalisadorLexico.h"
-
+#include "AnalisadorLexico.h"
 static TabelaSimbolos _AumentarTabela(TabelaSimbolos *tabela);
-
+bool InserirSimbolo();
+Simbolo GerarSimbolo();
 void inicializarTabela(TabelaSimbolos *tabela){
     tabela->tamanhoLogico = 0;
     tabela->tamanho = 100;
     tabela->ScopoAtual = 0;
     tabela->tabela = malloc(tabela->tamanho * sizeof(Simbolo));
+    Simbolo read = GerarSimbolo("read",procedimento,tabela,NULL);
+    Simbolo write = GerarSimbolo("write",procedimento,tabela,NULL);
+    InserirSimbolo(tabela,read);
+    InserirSimbolo(tabela,write);
     if(tabela->tabela == NULL)
         exit(-1);
 }

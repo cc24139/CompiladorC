@@ -358,6 +358,11 @@ void VerificaComandoSemRotulo()
 
             token = Analex();
             VerificaExpressao();
+                if(EhOperadorRelacional(token)){
+                printf("Erro: não usar operador relacional em atribuição"
+                "linha: %u, função %s()\n",linha,__func__);
+                exit(-1);
+            }
 
             while(token == virgula)
             {
@@ -391,7 +396,12 @@ void VerificaComandoSemRotulo()
             }
 
             token = Analex();
-            VerificaExpressao();
+            ExpressaoSimples();
+            if(EhOperadorRelacional(token)){
+                printf("Erro: não usar operador relacional em atribuição"
+                "linha: %u, função %s()\n",linha,__func__);
+                exit(-1);
+            }
         }
         else if(token == abreparenteses)
         {
@@ -465,9 +475,11 @@ void VerificaComandoSemRotulo()
             if(token != pontoevirgula)
             {
                 printf(
+                    
+                    "token: %s"
                     "Erro: Esperava-se um ponto e virgula. "
                     "Linha: %u, função: %s()\n",
-                    linha, __func__
+                    tokenString[token],linha, __func__
                 );
                 exit(-1);
             }
@@ -1003,7 +1015,7 @@ void AtribuirProcedimento()
             linha, __func__
         );
         printf("Token encontrado: %s\n", tokenString[token]);
-        exit(1);
+        exit(-1);
     }
 
     token = Analex();
@@ -1019,7 +1031,7 @@ void AtribuirTipoImplicito()
             linha, __func__
         );
         printf("Token encontrado: %s\n", tokenString[token]);
-        exit(1);
+        exit(-1);
     }
 
     token = Analex();
@@ -1032,7 +1044,7 @@ void AtribuirTipoImplicito()
             linha, __func__
         );
         printf("Token encontrado: %s\n", tokenString[token]);
-        exit(1);
+        exit(-1);
     }
 
     int primeiro = tabela.tamanhoLogico;
@@ -1055,7 +1067,7 @@ void AtribuirTipoImplicito()
                 linha, __func__
             );
             printf("Token encontrado: %s\n", tokenString[token]);
-            exit(1);
+            exit(-1);
         }
 
         InserirSimboloOuErro(
@@ -1194,7 +1206,7 @@ void Atribuirrotulo()
         exit(1);
     }
 
-    printf("Token encontrado: %s\n", tokenString[token]);
+
 
     while(token == virgula)
     {
@@ -1277,7 +1289,7 @@ void verificaProgam()
             linha, __func__
         );
         printf("Token encontrado: %s\n", tokenString[token]);
-        exit(1);
+        exit(-1);
     }
 
     token = Analex();
@@ -1360,7 +1372,7 @@ void verificaProgam()
             linha, __func__
         );
         printf("Token encontrado: %s\n", tokenString[token]);
-        exit(1);
+        exit(-1);
     }
 
     verificaBloco();
