@@ -12,7 +12,7 @@ void inicializarTabela(TabelaSimbolos *tabela){
     tabela->ScopoAtual = 0;
     tabela->tabela = malloc(tabela->tamanho * sizeof(Simbolo));
     if(tabela->tabela == NULL)
-        exit(EXIT_FAILURE);
+        exit(-1);
 }
 
 Simbolo GerarSimbolo (char *nome, Token tipo,TabelaSimbolos *tabela, void *valor) {
@@ -25,7 +25,7 @@ Simbolo GerarSimbolo (char *nome, Token tipo,TabelaSimbolos *tabela, void *valor
     if(valor != NULL) {
         simbolo.valor = malloc(strlen((char *)valor) + 1);
         if(simbolo.valor == NULL)
-            exit(EXIT_FAILURE);
+            exit(-1);
         strcpy(simbolo.valor, (char *)valor);
     }
     return simbolo;
@@ -49,13 +49,14 @@ bool RemoverUltimoSimbolo(TabelaSimbolos *tabela){
     return RemoverSimbolo(tabela, tabela->tabela[tabela->tamanhoLogico - 1].nome);
 }
 
-bool BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
-    for (int i = 0; i < tabela->tamanhoLogico; i++) {
-        if (strcmp(tabela->tabela[i].nome, nome) == 0) {
-            return true;
-        }
+Simbolo BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
+    for(int i = tabela->tamanhoLogico - 1; i >= 0; i--)
+    {
+        if(strcmp(tabela->tabela[i].nome, nome) == 0)
+            return tabela->tabela[i];
     }
-    return false;
+    Simbolo nulo;
+    return nulo;
 }
 
 //Como é adicionado em forma de pilha o escopo atual fica no final do vetor
@@ -90,7 +91,7 @@ TabelaSimbolos _AumentarTabela(TabelaSimbolos *tabela){
     novaTabela.ScopoAtual = tabela->ScopoAtual;
     novaTabela.tabela = malloc(novaTabela.tamanho * sizeof(Simbolo));
     if(novaTabela.tabela == NULL)
-        exit(EXIT_FAILURE);
+        exit(-1);
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
         novaTabela.tabela[i] = tabela->tabela[i];
     }
