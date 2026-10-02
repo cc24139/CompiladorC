@@ -26,7 +26,7 @@ Simbolo GerarSimbolo(char *nome, Token token, TabelaSimbolos *tabela, void *valo
 void inicializarTabela(TabelaSimbolos *tabela);
 bool InserirSimbolo(TabelaSimbolos *tabela, Simbolo simboloASerInseriddo);
 bool RemoverUltimoSimbolo(TabelaSimbolos *tabela);
-bool BuscarSimbolo(TabelaSimbolos *tabela, char *nome);
+Simbolo *BuscarSimbolo(TabelaSimbolos *tabela, char *nome);
 bool RemoverSimbolo(TabelaSimbolos *tabela, char *nome);
 void ImprimirTabela(TabelaSimbolos *tabela);
 void mostrarValorInt(void *valor);

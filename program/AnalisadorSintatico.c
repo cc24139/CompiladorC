@@ -21,15 +21,6 @@ void verificaBloco();
 void VerificaComando();
 void VerificaExpressao();
 
-static Simbolo *BuscarSimboloVisivel(char *nome)
-{
-    for(int i = tabela.tamanhoLogico - 1; i >= 0; i--)
-    {
-        if(strcmp(tabela.tabela[i].nome, nome) == 0)
-            return &tabela.tabela[i];
-    }
-    return NULL;
-}
 
 static Simbolo *BuscarRotuloVisivel(char *nome)
 {
@@ -107,7 +98,7 @@ void Fator()
 
     if(token == identificador)
     {
-        Simbolo *simbolo = BuscarSimboloVisivel(palavraAtual);
+        Simbolo *simbolo = BuscarSimbolo(&tabela,palavraAtual);
 
         if(simbolo == NULL)
         {
@@ -339,7 +330,7 @@ void VerificaComandoSemRotulo()
 {
     if(token == identificador)
     {
-        Simbolo *simbolo = BuscarSimboloVisivel(palavraAtual);
+        Simbolo *simbolo = BuscarSimbolo(&tabela,palavraAtual);
 
         if(simbolo == NULL)
         {

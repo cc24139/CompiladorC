@@ -49,14 +49,12 @@ bool RemoverUltimoSimbolo(TabelaSimbolos *tabela){
     return RemoverSimbolo(tabela, tabela->tabela[tabela->tamanhoLogico - 1].nome);
 }
 
-Simbolo BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
-    for(int i = tabela->tamanhoLogico - 1; i >= 0; i--)
-    {
-        if(strcmp(tabela->tabela[i].nome, nome) == 0)
-            return tabela->tabela[i];
+Simbolo *BuscarSimbolo(TabelaSimbolos *tabela, char *nome) {
+    for (int i = tabela->tamanhoLogico - 1; i >= 0; i--) {
+        if (strcmp(tabela->tabela[i].nome, nome) == 0)
+            return &tabela->tabela[i];
     }
-    Simbolo nulo;
-    return nulo;
+    return NULL;
 }
 
 //Como é adicionado em forma de pilha o escopo atual fica no final do vetor
