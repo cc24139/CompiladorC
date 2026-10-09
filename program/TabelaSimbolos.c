@@ -24,6 +24,7 @@ Simbolo GerarSimbolo (char *nome, Token tipo,TabelaSimbolos *tabela, void *valor
     Simbolo simbolo;
     strcpy(simbolo.nome, nome);
     simbolo.token = tipo;
+    simbolo.tipo = tipoIndefinido;
     simbolo.escopo = tabela->ScopoAtual;
     simbolo.valor = NULL;
     simbolo.mostrarValor = NULL;
@@ -45,6 +46,29 @@ bool InserirSimbolo(TabelaSimbolos *tabela, Simbolo simboloASerInseriddo){
         tabela->tabela[tabela->tamanhoLogico] = simboloASerInseriddo;
         tabela->tamanhoLogico++;
         return true;
+}
+
+void *AtualizarSimbolo(TabelaSimbolos *tabela,Simbolo sim){
+    for (int i = tabela->tamanhoLogico - 1; i >= 0; i--) {
+        if (strcmp(tabela->tabela[i].nome, sim.nome) == 0){
+             char *novoValor = NULL;
+            
+            if (sim.valor != NULL) {
+                novoValor = malloc(strlen((char *)sim.valor) + 1);
+                
+                if (novoValor == NULL)
+                    exit(EXIT_FAILURE);
+
+                strcpy(novoValor, (char *)sim.valor);
+            }
+
+            free(tabela->tabela[i].valor);
+            tabela->tabela[i].valor = novoValor;
+            return novoValor;
+        }
+        
+    }
+    return NULL;
 }
 
 
@@ -104,10 +128,10 @@ TabelaSimbolos _AumentarTabela(TabelaSimbolos *tabela){
 
 void ImprimirTabela(TabelaSimbolos *tabela) {
     printf("Tabela de Simbolos:\n");
-    printf("Nome\tTipo\tEscopo\n");
+    printf("Nome\t\tTipo\t\tEscopo\n");
     for (int i = 0; i < tabela->tamanhoLogico; i++) {
-        printf("%s\t%s\t%d ", tabela->tabela[i].nome, tokenString[tabela->tabela[i].token], tabela->tabela[i].escopo);
-        printf("%s\n", tabela->tabela[i].valor != NULL ? (char *)tabela->tabela[i].valor : "");
+        printf("%s\t\t%s\t\t%d \n ", tabela->tabela[i].nome, tokenString[tabela->tabela[i].token], tabela->tabela[i].escopo);
+        //printf("%s\n", tabela->tabela[i].valor != NULL ? (char *)tabela->tabela[i].valor : "");
     }
 }
 

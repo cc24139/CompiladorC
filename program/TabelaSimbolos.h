@@ -8,9 +8,14 @@
 #include "AnalisadorLexico.h"
 #include "basics.h"
 
+typedef enum TipoSemantico {
+    tipoIndefinido, tipoInteger, tipoDouble, tipoChar, tipoBooleano
+} TipoSemantico;
+
 typedef struct Simbolo {
     char nome[100];
     Token token;
+    TipoSemantico tipo;
     int escopo;
     void *valor;
     void (*mostrarValor)(void *valor);
@@ -32,9 +37,8 @@ bool RemoverSimbolo(TabelaSimbolos *tabela, char *nome);
 void ImprimirTabela(TabelaSimbolos *tabela);
 void mostrarValorInt(void *valor);
 void LiberarTabela(TabelaSimbolos *tabela);
-
+void *AtualizarSimbolo(TabelaSimbolos *tabela,Simbolo sim);
 void RemoverScopo(TabelaSimbolos *tabela, int escopo);
 
 #endif
-
 

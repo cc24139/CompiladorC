@@ -102,7 +102,9 @@ char *tokenString[] = {
 	 "ponto",
 	 "numero",
 	 "identificador",
-	 "fimDeArquivo"
+	 "fimDeArquivo",
+	 "invalido",
+	 "caractere"
 };
 
 int retornarDelimitador(char letra) {
@@ -186,6 +188,31 @@ int retornarProximaPalavra(FILE *arquivo) {
         break;
     }
 
+    // Literais char: 'a', '\n', '\\', '\'', etc.
+    if (charact == '\'') {
+        bool escapado = false;
+        palavraAtual[i++] = charact;
+
+        while ((charact = fgetc(arquivo)) != EOF) {
+            if (charact == '\n' || charact == '\r') {
+                if (charact == '\n')
+                    linha++;
+                break;
+            }
+
+            if (i < (int)sizeof(palavraAtual) - 1)
+                palavraAtual[i++] = charact;
+
+            if (charact == '\'' && !escapado)
+                break;
+
+            escapado = charact == '\\' && !escapado;
+        }
+
+        palavraAtual[i] = '\0';
+        return true;
+    }
+
     // =========================
     // OPERADORES COMPOSTOS
     // =========================
@@ -262,6 +289,21 @@ Token Analex()
 		{
 			return i;
 		}
+	}
+
+	if (palavraAtual[0] == '\'') {
+		size_t tamanho = strlen(palavraAtual);
+
+		if (tamanho == 3 && palavraAtual[2] == '\'' &&
+		    palavraAtual[1] != '\\' && palavraAtual[1] != '\'')
+			return caractere;
+
+		if (tamanho == 4 && palavraAtual[1] == '\\' &&
+		    palavraAtual[3] == '\'' &&
+		    strchr("abfnrtv0\\'\"", palavraAtual[2]) != NULL)
+			return caractere;
+
+		return invalido;
 	}
 
 	if (!(palavraAtual[0] >= '0' && palavraAtual[0] <= '9'))

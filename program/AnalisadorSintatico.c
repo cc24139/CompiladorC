@@ -19,7 +19,7 @@ TabelaSimbolos tabela;
 // Assinaturas de métodos caso ocorra recursão indireta.
 void verificaBloco();
 void VerificaComando();
-void VerificaExpressao();
+TipoSemantico VerificaExpressao();
 
 
 static Simbolo *BuscarRotuloVisivel(char *nome)
@@ -48,39 +48,76 @@ static void InserirSimboloOuErro(Simbolo simbolo)
     }
 }
 
-bool verificaType(Token token)
+static TipoSemantico ObterTipo(const char *nome)
 {
-    if(strcmp(palavraAtual, "integer") == 0)
-        return true;
+    if(strcmp(nome, "integer") == 0)
+        return tipoInteger;
 
-    if(strcmp(palavraAtual, "double") == 0)
-        return true;
+    if(strcmp(nome, "double") == 0)
+        return tipoDouble;
 
-    if(strcmp(palavraAtual, "char") == 0)
-        return true;
+    if(strcmp(nome, "char") == 0)
+        return tipoChar;
 
-    return false;
+    return tipoIndefinido;
 }
 
-void Fator()
+static const char *NomeTipo(TipoSemantico tipoAtual)
+{
+    switch(tipoAtual)
+    {
+        case tipoInteger: return "integer";
+        case tipoDouble: return "double";
+        case tipoChar: return "char";
+        case tipoBooleano: return "booleano";
+        default: return "indefinido";
+    }
+}
+
+static void CompararTipos(TipoSemantico tipoAtual, const Simbolo *simbolo)
+{
+    if(tipoAtual == tipoIndefinido || tipoAtual != simbolo->tipo)
+    {
+        printf(
+            "Erro semântico: tipos incompatíveis para '%s': "
+            "esperado %s, recebido %s. Linha: %u, função: %s()\n",
+            simbolo->nome, NomeTipo(simbolo->tipo), NomeTipo(tipoAtual),
+            linha, __func__
+        );
+        exit(1);
+    }
+}
+
+bool verificaType(Token token)
+{
+    return token == identificador && ObterTipo(palavraAtual) != tipoIndefinido;
+}
+
+TipoSemantico Fator()
 {
     if(token == numero)
     {
         token = Analex();
-        return;
+        return tipoInteger;
+    }
+
+    if(token == caractere)
+    {
+        token = Analex();
+        return tipoChar;
     }
 
     if(token == nao)
     {
         token = Analex();
         Fator();
-        return;
+        return tipoBooleano;
     }
 
     if(token == abreparenteses)
     {
         token = Analex();
-        VerificaExpressao();
+        TipoSemantico tipoAtual = VerificaExpressao();
 
         if(token != fechaparenteses)
         {
@@ -93,7 +130,7 @@ void Fator()
         }
 
         token = Analex();
-        return;
+        return tipoAtual;
     }
 
     if(token == identificador)
@@ -148,7 +185,7 @@ void Fator()
             }
 
             token = Analex();
-            return;
+            return simbolo->tipo;
         }
 
         if(token == abrecolchetes)
@@ -183,7 +220,7 @@ void Fator()
             }
 
             token = Analex();
-            return;
+            return simbolo->tipo;
         }
 
         if(simbolo->token == procedimento ||
@@ -198,21 +235,22 @@ void Fator()
             exit(-1);
         }
 
-        return;
+        return simbolo->tipo;
     }
 
     printf(
-        "Erro: Esperava-se um identificador, número, abreparenteses ou nao. "
+        "Erro: Esperava-se um identificador, número, caractere, abreparenteses ou nao. "
         "Linha: %u, função: %s()\n",
         linha, __func__
     );
     exit(-1);
 }
 
-void Termo()
+TipoSemantico Termo()
 {
     if(token != identificador &&
        token != numero &&
+       token != caractere &&
        token != nao &&
        token != abreparenteses)
     {
@@ -223,14 +261,16 @@ void Termo()
         exit(-1);
     }
 
-    Fator();
+    TipoSemantico tipoAtual = Fator();
 
     while(token == vezes || token == dividir || token == e)
     {
+        Token operador = token;
         token = Analex();
 
         if(token != identificador &&
            token != numero &&
+           token != caractere &&
            token != nao &&
            token != abreparenteses)
         {
@@ -241,11 +281,17 @@ void Termo()
             exit(-1);
         }
 
-        Fator();
+        TipoSemantico tipoFator = Fator();
+        if(operador == e)
+            tipoAtual = tipoBooleano;
+        else if(tipoAtual != tipoFator)
+            tipoAtual = tipoIndefinido;
     }
+
+    return tipoAtual;
 }
 
-void ExpressaoSimples()
+TipoSemantico ExpressaoSimples()
 {
     if(token == mais || token == menos)
     {
@@ -254,6 +300,7 @@ void ExpressaoSimples()
 
     if(token != identificador &&
        token != numero &&
+       token != caractere &&
        token != nao &&
        token != abreparenteses)
     {
@@ -264,14 +311,16 @@ void ExpressaoSimples()
         exit(-1);
     }
 
-    Termo();
+    TipoSemantico tipoAtual = Termo();
 
     while(token == mais || token == menos || token == ou)
     {
+        Token operador = token;
         token = Analex();
 
         if(token != identificador &&
            token != numero &&
+           token != caractere &&
            token != nao &&
            token != abreparenteses)
         {
@@ -282,8 +331,14 @@ void ExpressaoSimples()
             exit(-1);
         }
 
-        Termo();
+        TipoSemantico tipoTermo = Termo();
+        if(operador == ou)
+            tipoAtual = tipoBooleano;
+        else if(tipoAtual != tipoTermo)
+            tipoAtual = tipoIndefinido;
     }
+
+    return tipoAtual;
 }
 
 static bool EhOperadorRelacional(Token token)
@@ -296,15 +351,18 @@ static bool EhOperadorRelacional(Token token)
            token == maiorouigual;
 }
 
-void VerificaExpressao()
+TipoSemantico VerificaExpressao()
 {
-    ExpressaoSimples();
+    TipoSemantico tipoAtual = ExpressaoSimples();
 
     if(EhOperadorRelacional(token))
     {
         token = Analex();
         ExpressaoSimples();
+        return tipoBooleano;
     }
+
+    return tipoAtual;
 }
 
 
@@ -341,9 +399,9 @@ void VerificaComandoSemRotulo()
             );
             exit(-1);
         }
-
+        Simbolo *simboloAtual = BuscarSimbolo(&tabela,palavraAtual);
         token = Analex();
-
+     
         if(token == abrecolchetes)
         {
             if(simbolo->token != variavel)
@@ -355,15 +413,16 @@ void VerificaComandoSemRotulo()
                 );
                 exit(-1);
             }
-
+            
             token = Analex();
+           
             VerificaExpressao();
                 if(EhOperadorRelacional(token)){
                 printf("Erro: não usar operador relacional em atribuição"
                 "linha: %u, função %s()\n",linha,__func__);
                 exit(-1);
             }
-
+        
             while(token == virgula)
             {
                 token = Analex();
@@ -382,9 +441,10 @@ void VerificaComandoSemRotulo()
 
             token = Analex();
         }
-
+      
         if(token == atribuicao)
         {
+           
             if(simbolo->token != variavel && simbolo->token != funcao)
             {
                 printf(
@@ -396,12 +456,20 @@ void VerificaComandoSemRotulo()
             }
 
             token = Analex();
-            ExpressaoSimples();
+            
+          
+            TipoSemantico tipoAtual = ExpressaoSimples();
             if(EhOperadorRelacional(token)){
                 printf("Erro: não usar operador relacional em atribuição"
                 "linha: %u, função %s()\n",linha,__func__);
                 exit(-1);
             }
+
+            CompararTipos(tipoAtual, simboloAtual);
+            //atualizar
+            Simbolo atualizado = *simboloAtual;
+            //atualizado.valor = palavraAtual;
+            AtualizarSimbolo(&tabela, atualizado);
         }
         else if(token == abreparenteses)
         {
@@ -597,7 +665,7 @@ void VerificaComando()
 bool EhBloco()
 {
     bool Ehrotulo = token == rotulo;
-    bool EhTipo = token == tipo;
+    bool EhTipo = token == tipo || verificaType(token);
     bool EhImplicito = token == variavel;
     bool EhProcedimento = token == procedimento;
     bool EhFuncao = token == funcao;
@@ -682,6 +750,7 @@ void parametrosFormais()
                 exit(-1);
 
             strcpy(tabela.tabela[primeiro].valor, palavraAtual);
+            tabela.tabela[primeiro].tipo = ObterTipo(palavraAtual);
             token = Analex();
 
             while(token == virgula)
@@ -706,6 +775,8 @@ void parametrosFormais()
                         tabela.tabela[primeiro].valor
                     )
                 );
+                tabela.tabela[tabela.tamanhoLogico - 1].tipo =
+                    tabela.tabela[primeiro].tipo;
 
                 token = Analex();
             }
@@ -765,10 +836,10 @@ void parametrosFormais()
 
             token = Analex();
 
-            if(token != identificador)
+            if(verificaType(token) == false)
             {
                 printf(
-                    "Erro: Esperava-se um identificador. "
+                    "Erro: Esperava-se um tipo de retorno. "
                     "Linha: %u, função: %s()\n",
                     linha, __func__
                 );
@@ -783,6 +854,7 @@ void parametrosFormais()
                     exit(-1);
 
                 strcpy(tabela.tabela[i].valor, palavraAtual);
+                tabela.tabela[i].tipo = ObterTipo(palavraAtual);
             }
 
             token = Analex();
@@ -868,6 +940,7 @@ void AtribuirFuncao()
 
     InserirSimboloOuErro(simbFunc);
     tabela.ScopoAtual++;
+    //ImprimirTabela(&tabela);
     token = Analex();
 
     if(token != abreparenteses && token != doispontos)
@@ -898,10 +971,10 @@ void AtribuirFuncao()
 
     token = Analex();
 
-    if(token != identificador)
+    if(verificaType(token) == false)
     {
         printf(
-            "Erro: esperava-se um identificador (tipo de retorno). "
+            "Erro: esperava-se um tipo de retorno. "
             "Linha: %u, função: %s()\n",
             linha, __func__
         );
@@ -914,6 +987,7 @@ void AtribuirFuncao()
         exit(-1);
 
     strcpy(tabela.tabela[indiceFuncao].valor, palavraAtual);
+    tabela.tabela[indiceFuncao].tipo = ObterTipo(palavraAtual);
     token = Analex();
 
     if(token != pontoevirgula)
@@ -1105,6 +1179,7 @@ void AtribuirTipoImplicito()
             exit(-1);
 
         strcpy(tabela.tabela[i].valor, palavraAtual);
+        tabela.tabela[i].tipo = ObterTipo(palavraAtual);
     }
 
     token = Analex();
@@ -1120,8 +1195,10 @@ void AtribuirTipoImplicito()
     }
 }
 
+
 void AtribuirVariavel()
 {
+    TipoSemantico tipoAtual = ObterTipo(palavraAtual);
     token = Analex();
 
     if(token != identificador)
@@ -1160,13 +1237,14 @@ void AtribuirVariavel()
         );
         exit(-1);
     }
-
     tabela.tabela[primeiro].valor = malloc(strlen(palavraAtual) + 1);
 
     if(tabela.tabela[primeiro].valor == NULL)
         exit(-1);
 
     strcpy(tabela.tabela[primeiro].valor, palavraAtual);
+    tabela.tabela[primeiro].tipo = ObterTipo(palavraAtual);
+    CompararTipos(tipoAtual, &tabela.tabela[primeiro]);
     token = Analex();
 
     if(token != pontoevirgula)
@@ -1402,7 +1480,7 @@ int main()
 
     fclose(arquivo);
 
-    printf("Programa sintaticamente correto!\n");
+    printf("Programa sintaticamente e SEMANTICAMENTE correto!\n");
 
     return 0;
 }

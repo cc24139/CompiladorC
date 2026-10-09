@@ -18,7 +18,7 @@ typedef enum {
     menor, menorouigual, maior, maiorouigual, e, ou, nao,
     abreparenteses, fechaparenteses, abrecolchetes,
     fechacolchetes, virgula, pontoevirgula, doispontos,
-    ponto, numero, identificador, finalDeArquivo, invalido
+    ponto, numero, identificador, finalDeArquivo, invalido, caractere
 } Token;
 
 int retornarDelimitador(char letra);
